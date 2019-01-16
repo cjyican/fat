@@ -12,14 +12,14 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.cjy.fat.data.TransactionContent;
-import com.cjy.fat.redis.TxRedisHelper;
+import com.cjy.fat.redis.RedisHelper;
 
 @Component
 @ConditionalOnClass({EnableDiscoveryClient.class})
 public class SpringCloudRemoteTransactionAccepter implements RemoteTransactionAccepter{
 	
 	@Autowired
-	TxRedisHelper txRedisHelper;
+	RedisHelper redisHelper;
 	
 	@Value("${spring.application.name}")
 	String serviceName;
@@ -45,7 +45,7 @@ public class SpringCloudRemoteTransactionAccepter implements RemoteTransactionAc
 			TransactionContent.setRootTxKey(rootTxKey);
 		}
 		// 获取serviceId（客户端生成的调用服务的标识，避免重复调用服务，导致的服务标识重复问题）
-		String serviceId = txRedisHelper.popFromServiceIdSet(remoteTxKey);
+		String serviceId = redisHelper.popFromServiceIdSet(remoteTxKey);
 		if(StringUtils.isBlank(serviceId)){
 			serviceId = serviceName;
 		}

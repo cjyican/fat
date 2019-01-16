@@ -26,12 +26,13 @@ public @interface FatServiceRegister {
 	/**
 	 * 业务线处理完成时间总等待时长 , 默认5秒
 	 */
+	@Deprecated
 	long waitFinishMilliesSeconds() default 5000;
 	
 	/**
 	 * 本地事务数量
 	 */
-	int localTxCount() default 0; 
+	int localTransactionCount() default 0; 
 	
 	/**
 	 * 服务数量

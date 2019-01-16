@@ -20,7 +20,7 @@ import com.cjy.fat.annotation.FatTransaction;
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
 import com.cjy.fat.exception.FatTransactionException;
-import com.cjy.fat.redis.TxRedisHelper;
+import com.cjy.fat.redis.RedisHelper;
 import com.cjy.fat.resolve.handler.ServiceRunningHandler;
 
 @Aspect
@@ -30,7 +30,7 @@ import com.cjy.fat.resolve.handler.ServiceRunningHandler;
 public class TransactionAspect {
 	
 	@Autowired
-	TxRedisHelper txRedisHelper;
+	RedisHelper redisHelper;
 
 	@Autowired
 	ServiceRunningHandler serviceHandler;
@@ -71,7 +71,7 @@ public class TransactionAspect {
 		Method serviceMethod = signature.getMethod();
 		Transactional transactionalAnno = serviceMethod.getAnnotation(Transactional.class);
 		if(null == transactionalAnno) {
-			txRedisHelper.opsForServiceError().txServiceError(txKey);
+			redisHelper.opsForServiceError().txServiceError(txKey);
 			throw new FatTransactionException("the method " + serviceMethod.getName() + " is not decorated by @Transactional");
 		}
 		TransactionResolveParam param = new TransactionResolveParam(

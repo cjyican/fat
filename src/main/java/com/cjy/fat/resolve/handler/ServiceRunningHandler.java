@@ -18,7 +18,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import com.alibaba.fastjson.JSONObject;
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
-import com.cjy.fat.redis.TxRedisHelper;
+import com.cjy.fat.redis.RedisHelper;
 import com.cjy.fat.resolve.CommitResolver;
 
 @Service
@@ -31,7 +31,7 @@ public class ServiceRunningHandler {
 	DataSourceTransactionManager transactionManager;
 
 	@Autowired
-	TxRedisHelper txRedisHelper;
+	RedisHelper redisHelper;
 	
 	@Autowired
 	CommitResolver commitResolver;
@@ -47,7 +47,7 @@ public class ServiceRunningHandler {
 		TransactionStatus transStatus = transactionManager.getTransaction(transDefinition);
 		try {
 			Logger.info("{}-transaction start"  ,param.getLocalTxMark());
-			txRedisHelper.opsForServiceError().isTxServiceError(param.getTxKey());
+			redisHelper.opsForServiceError().isTxServiceError(param.getTxKey());
 			Object result = joinPoint.proceed();
 			String resultJSON = JSONObject.toJSONString(result);
 			Logger.info("{}-service is finished , transaction is waiting for commit,service result:{}", param.getLocalTxMark(), resultJSON);
@@ -58,7 +58,7 @@ public class ServiceRunningHandler {
 			transactionManager.commit(transStatus);
 			Logger.info("{}-transaction commit" , param.getLocalTxMark());
 		} catch (Exception e) {
-			txRedisHelper.opsForServiceError().txServiceError(param.getTxKey());
+			redisHelper.opsForServiceError().txServiceError(param.getTxKey());
 			Logger.error("{}-transaction rollback ,error:{}", param.getLocalTxMark() , e.getMessage());
 			transactionManager.rollback(transStatus);
 			e.printStackTrace();

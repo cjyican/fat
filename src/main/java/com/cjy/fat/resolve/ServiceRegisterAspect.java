@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import com.cjy.fat.annotation.FatServiceRegister;
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.exception.FatTransactionException;
-import com.cjy.fat.redis.TxRedisHelper;
+import com.cjy.fat.redis.RedisHelper;
 import com.cjy.fat.resolve.accept.RemoteTransactionDataResolver;
 
 @Aspect
@@ -28,7 +28,7 @@ public class ServiceRegisterAspect {
 	private static final Logger Logger = LoggerFactory.getLogger(ServiceRegisterAspect.class);
 	
 	@Autowired
-	TxRedisHelper txRedisHelper;
+	RedisHelper redisHelper;
 
 	@Value("${spring.application.name}")
 	String serviceName;
@@ -64,11 +64,11 @@ public class ServiceRegisterAspect {
 		String remoteTxKey = TransactionContent.getRemoteTxKey();
 		if(StringUtils.isNotBlank(localTxkey)){
 			// 写入错误标识，引发回滚本地事务/子事务组
-			txRedisHelper.opsForServiceError().txServiceError(localTxkey);
+			redisHelper.opsForServiceError().txServiceError(localTxkey);
 		}
 		if(StringUtils.isNotBlank(remoteTxKey)){
 			// 写入错误标识，引发回滚父事务组
-			txRedisHelper.opsForServiceError().txServiceError(remoteTxKey);
+			redisHelper.opsForServiceError().txServiceError(remoteTxKey);
 		}
 		Logger.error(ex.getMessage());
 	}
@@ -85,7 +85,7 @@ public class ServiceRegisterAspect {
 		// 当存在远程事务 ， 本地事务时需要明确指定本地事务数量 , 若此时本地事务组依然存在元素，说明数量配置不正确
 		if(StringUtils.isNotBlank(remoteTxKey) && StringUtils.isNotBlank(localTxKey)){
 			if(TransactionContent.pollLocalTxQueue() != null){
-				int confLocalTxNum = txRegisterService.localTxCount();
+				int confLocalTxNum = txRegisterService.localTransactionCount();
 				int realLocalTxNum = confLocalTxNum - TransactionContent.localTxQueueSize();
 				throw new FatTransactionException(localTxKey , "local transaction group count is incorrect , real count maybe " + realLocalTxNum); 
 			}

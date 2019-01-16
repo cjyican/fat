@@ -10,7 +10,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.data.TransactionContent;
-import com.cjy.fat.redis.TxRedisHelper;
+import com.cjy.fat.redis.RedisHelper;
 
 /**
  * 自定义服务api的远程信息接收器
@@ -22,7 +22,7 @@ import com.cjy.fat.redis.TxRedisHelper;
 public class CustomRemoteTransactionAccepter implements RemoteTransactionAccepter{
 	
 	@Autowired
-	TxRedisHelper txRedisHelper;
+	RedisHelper redisHelper;
 	
 	@Autowired
 	ApplicationContext context;
@@ -50,7 +50,7 @@ public class CustomRemoteTransactionAccepter implements RemoteTransactionAccepte
 					TransactionContent.setRootTxKey(rootTxKey);
 				}
 				// 获取serviceId
-				String serviceId = txRedisHelper.popFromServiceIdSet(remoteTxKey);
+				String serviceId = redisHelper.popFromServiceIdSet(remoteTxKey);
 				if(StringUtils.isBlank(serviceId)){
 					serviceId = serviceName;
 				}

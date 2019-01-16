@@ -10,14 +10,14 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.cjy.fat.data.TransactionContent;
-import com.cjy.fat.redis.TxRedisHelper;
+import com.cjy.fat.redis.RedisHelper;
 
 @Component
 @ConditionalOnClass({RpcContext.class})
 public class DubboRemoteTransactionAccepter implements RemoteTransactionAccepter {
 	
 	@Autowired
-	TxRedisHelper txRedisHelper;
+	RedisHelper redisHelper;
 	
 	@Value("${spring.application.name}")
 	String serviceName;
@@ -43,7 +43,7 @@ public class DubboRemoteTransactionAccepter implements RemoteTransactionAccepter
   			TransactionContent.setRootTxKey(rootTxKey);
   		}
   		// 获取serviceId
-  		String serviceId = txRedisHelper.popFromServiceIdSet(remoteTxKey);
+  		String serviceId = redisHelper.popFromServiceIdSet(remoteTxKey);
   		if(StringUtils.isBlank(serviceId)){
   			serviceId = serviceName;
   		}
