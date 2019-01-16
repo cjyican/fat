@@ -15,7 +15,7 @@ public class TransactionContent {
 	 */
 	public static final String STR_ROOT_TX_KEY = "rootTxKey";
 	
-	private static ThreadLocal<TransactionThreadLocal> txThreadLocalContainer = new ThreadLocal<>();
+	private static ThreadLocal<TransactionThreadLocal> container = new ThreadLocal<>();
 	
 	/**
 	 * 获取事务信息提供给自定义拦截器
@@ -35,14 +35,14 @@ public class TransactionContent {
 	 * @return
 	 */
 	public static void setRemoteTxKey(String remoteTxKey) {
-		txThreadLocalContainer.get().setRemoteTxKey(remoteTxKey);
+		container.get().setRemoteTxKey(remoteTxKey);
 	}
 	
 	/**
 	 * 获取远程分布式key
 	 */
 	public static String getRemoteTxKey() {
-		return txThreadLocalContainer.get().getRemoteTxKey();
+		return container.get().getRemoteTxKey();
 	}
 	
 	/**
@@ -51,65 +51,65 @@ public class TransactionContent {
 	 * @return
 	 */
 	public static void setLocalTxKey(String localTxKey) {
-		txThreadLocalContainer.get().setLocalTxKey(localTxKey);
+		container.get().setLocalTxKey(localTxKey);
 	}
 	
 	/**
 	 * 获取本地分布式key
 	 */
 	public static String getLocalTxKey() {
-		return  txThreadLocalContainer.get().getLocalTxKey();
+		return  container.get().getLocalTxKey();
 	}
 	
 	public static void setRootTxKey(String rootTxKey) {
-		txThreadLocalContainer.get().setRootTxKey(rootTxKey);
+		container.get().setRootTxKey(rootTxKey);
 	}
 
 	public static String getRootTxKey() {
-		return txThreadLocalContainer.get().getRootTxKey();
+		return container.get().getRootTxKey();
 	}
 	
 	/**
 	 * 本地事务组加入元素
 	 */
 	public static void pushLocalTxQueue(String localTxMark){
-		txThreadLocalContainer.get().getLocalTxQueue().add(localTxMark);
+		container.get().getLocalTxQueue().add(localTxMark);
 	}
 	
 	/**
 	 * 本地事务组取出元素
 	 */
 	public static String pollLocalTxQueue(){
-		return txThreadLocalContainer.get().getLocalTxQueue().poll();
+		return container.get().getLocalTxQueue().poll();
 	}
 	
 	/**
 	 * 本地事务组数量
 	 */
 	public static int localTxQueueSize(){
-		return txThreadLocalContainer.get().getLocalTxQueue().size();
+		return container.get().getLocalTxQueue().size();
 	}
 	
 	/**
 	 * 获取服务标识
 	 */
 	public static String getServiceId(){
-		return txThreadLocalContainer.get().getServiceId();
+		return container.get().getServiceId();
 	}
 	
 	/**
 	 * 设置服务标识
 	 */
 	public static void setServiceId(String serviceId){
-		txThreadLocalContainer.get().setServiceId(serviceId);
+		container.get().setServiceId(serviceId);
 	}
 	
 	/**
 	 * 由于使用了线程池，当线程复用的时候，TheadLocal依然存在，需要在请求入口清空ThreadLocal
 	 */
 	public static final void initContainer(){
-		txThreadLocalContainer.remove();
-		txThreadLocalContainer.set(new TransactionThreadLocal());
+		container.remove();
+		container.set(new TransactionThreadLocal());
 	}
 	
 }
