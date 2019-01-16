@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.cjy.common.CompentScanInit
+com.cjy.fat.CompentScanInit

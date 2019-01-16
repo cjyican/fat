@@ -1,1 +1,1 @@
-txFilter=com.cjy.common.interceptor.TxFilter
+fatDubboFilter=com.cjy.fat.interceptor.FatDubboFilter
