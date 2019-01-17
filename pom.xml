@@ -4,13 +4,35 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.cjy</groupId>
+	<groupId>com.github.cjyican</groupId>
 	<artifactId>fat-common</artifactId>
 	<version>1.0.0</version>
 	<packaging>jar</packaging>
 
 	<name>fatboy-common</name>
-	<description>Demo project for Spring Boot</description>
+	<description>fat the resolver of soa transaction</description>
+	
+	<url>https://github.com/cjyican/fat</url>
+	
+	 <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+	</licenses>
+	
+	<developers>
+        <developer>
+            <name>chenjunyu</name>
+            <email>604532621@qq.com</email>
+        </developer>
+    </developers>
+    
+ 	<scm>
+        <connection>scm:git:https://github.com/cjyican/fat.git</connection>
+        <developerConnection>scm:git:https://github.com/cjyican/fat.git</developerConnection>
+        <url>https://github.com/cjyican/fat</url>
+	</scm>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
@@ -109,6 +131,75 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
+	
+	<profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- Source -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.2.1</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- Javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <configuration>
+                            <show>private</show>
+                            <nohelp>true</nohelp>
+                                    <charset>UTF-8</charset>
+			                <encoding>UTF-8</encoding>
+			                <docencoding>UTF-8</docencoding>
+			                <additionalparam>-Xdoclint:none</additionalparam>
+           				</configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <!-- GPG -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.5</version>
+                        <executions>
+                            <execution>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>oss</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                </snapshotRepository>
+                <repository>
+                    <id>oss</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 
 </project>
