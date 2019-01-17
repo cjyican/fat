@@ -22,7 +22,7 @@ public enum RedisKeyEnum {
 	/**
 	 * 是否有服务/事务出错 {@link RedisHelper }
 	 */
-	IS_SERVICE_ERROR(":is_service_error:"),
+	IS_SERVICE_ERROR(":service_error:"),
 	
 	/**
 	 * 加入的服务/事务列表 ， left push

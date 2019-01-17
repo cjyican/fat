@@ -41,7 +41,11 @@ public class TransactionResolveParam {
 	 * @return
 	 */
 	private BlockingQueue<String> localResultQueue ;
-	
+	/**
+	 * 在执行业务方法时抛出的异常，在主线程中不再使用redis接收
+	 */
+	private Exception localRunningException;
+
 	public TransactionResolveParam(String txKey, String localTxMark, String rootTxKey,
 			long waitCommitMilliesSeconds, long waitResultMilliesSeconds , Class<?> returnType) {
 		super();
@@ -52,6 +56,14 @@ public class TransactionResolveParam {
 		this.returnType = returnType;
 		this.waitResultMilliesSeconds = waitResultMilliesSeconds;
 		localResultQueue = new ArrayBlockingQueue<>(1);
+	}
+	
+	public Exception getLocalRunningException() {
+		return localRunningException;
+	}
+	
+	public void setLocalRunningException(Exception localRunningException) {
+		this.localRunningException = localRunningException;
 	}
 	
 	public long getWaitResultMilliesSeconds() {

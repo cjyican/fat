@@ -142,15 +142,15 @@ public class RedisHelper {
 		if(null == serviceErrorOperation) {
 			serviceErrorOperation = new ServiceErrorOperation() {
 				@Override
-				public void txServiceNomal(String txKey) {
+				public void serviceNomal(String txKey) {
 					redis.opsForValue().set(RedisHelper.initTxRedisKey(RedisKeyEnum.IS_SERVICE_ERROR, txKey) , NORMAL);
 				}
 				@Override
-				public void txServiceError(String txKey) {
+				public void serviceError(String txKey) {
 					redis.opsForValue().set(RedisHelper.initTxRedisKey(RedisKeyEnum.IS_SERVICE_ERROR, txKey) , ERROR);
 				}
 				@Override
-				public void isTxServiceError(String txKey) {
+				public void isServiceError(String txKey) {
 					boolean isError = redis.opsForValue().get(RedisHelper.initTxRedisKey(RedisKeyEnum.IS_SERVICE_ERROR, txKey)).equals(ERROR);
 					if(isError){
 						throw new FatTransactionException(txKey , txKey+" occured other transaction error when runnning local transaction");

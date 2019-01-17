@@ -71,7 +71,6 @@ public class TransactionAspect {
 		Method serviceMethod = signature.getMethod();
 		Transactional transactionalAnno = serviceMethod.getAnnotation(Transactional.class);
 		if(null == transactionalAnno) {
-			redisHelper.opsForServiceError().txServiceError(txKey);
 			throw new FatTransactionException("the method " + serviceMethod.getName() + " is not decorated by @Transactional");
 		}
 		TransactionResolveParam param = new TransactionResolveParam(

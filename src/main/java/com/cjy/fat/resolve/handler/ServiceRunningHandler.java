@@ -47,7 +47,7 @@ public class ServiceRunningHandler {
 		TransactionStatus transStatus = transactionManager.getTransaction(transDefinition);
 		try {
 			Logger.info("{}-transaction start"  ,param.getLocalTxMark());
-			redisHelper.opsForServiceError().isTxServiceError(param.getTxKey());
+			redisHelper.opsForServiceError().isServiceError(param.getTxKey());
 			Object result = joinPoint.proceed();
 			String resultJSON = JSONObject.toJSONString(result);
 			Logger.info("{}-service is finished , transaction is waiting for commit,service result:{}", param.getLocalTxMark(), resultJSON);
@@ -58,10 +58,10 @@ public class ServiceRunningHandler {
 			transactionManager.commit(transStatus);
 			Logger.info("{}-transaction commit" , param.getLocalTxMark());
 		} catch (Exception e) {
-			redisHelper.opsForServiceError().txServiceError(param.getTxKey());
-			Logger.error("{}-transaction rollback ,error:{}", param.getLocalTxMark() , e.getMessage());
 			transactionManager.rollback(transStatus);
-			e.printStackTrace();
+			redisHelper.opsForServiceError().serviceError(param.getTxKey());
+			param.setLocalRunningException(e);
+			Logger.error("{}-transaction rollback ,error:{}", param.getLocalTxMark() , e.getMessage());
 		}
 	}
 	

@@ -18,6 +18,7 @@ import com.cjy.fat.annotation.FatServiceRegister;
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.redis.RedisHelper;
+import com.cjy.fat.redis.constant.RedisKeyEnum;
 import com.cjy.fat.resolve.accept.RemoteTransactionDataResolver;
 
 @Aspect
@@ -64,11 +65,13 @@ public class ServiceRegisterAspect {
 		String remoteTxKey = TransactionContent.getRemoteTxKey();
 		if(StringUtils.isNotBlank(localTxkey)){
 			// 写入错误标识，引发回滚本地事务/子事务组
-			redisHelper.opsForServiceError().txServiceError(localTxkey);
+			redisHelper.opsForServiceError().serviceError(localTxkey);
+			redisHelper.opsForBlockMarkOperation().unPassBlockMark(localTxkey, RedisKeyEnum.SERVICE_READYCOMMIT_MARK);
 		}
 		if(StringUtils.isNotBlank(remoteTxKey)){
 			// 写入错误标识，引发回滚父事务组
-			redisHelper.opsForServiceError().txServiceError(remoteTxKey);
+			redisHelper.opsForServiceError().serviceError(remoteTxKey);
+			redisHelper.opsForBlockMarkOperation().unPassBlockMark(remoteTxKey, RedisKeyEnum.SERVICE_READYCOMMIT_MARK);
 		}
 		Logger.error(ex.getMessage());
 	}

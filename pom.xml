@@ -11,27 +11,27 @@
 
 	<name>fatboy-common</name>
 	<description>fat the resolver of soa transaction</description>
-	
+
 	<url>https://github.com/cjyican/fat</url>
-	
-	 <licenses>
-        <license>
-            <name>The Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
+
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
 	</licenses>
-	
+
 	<developers>
-        <developer>
-            <name>chenjunyu</name>
-            <email>604532621@qq.com</email>
-        </developer>
-    </developers>
-    
- 	<scm>
-        <connection>scm:git:https://github.com/cjyican/fat.git</connection>
-        <developerConnection>scm:git:https://github.com/cjyican/fat.git</developerConnection>
-        <url>https://github.com/cjyican/fat</url>
+		<developer>
+			<name>chenjunyu</name>
+			<email>604532621@qq.com</email>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:https://github.com/cjyican/fat.git</connection>
+		<developerConnection>scm:git:https://github.com/cjyican/fat.git</developerConnection>
+		<url>https://github.com/cjyican/fat</url>
 	</scm>
 
 	<parent>
@@ -73,14 +73,14 @@
 			<artifactId>spring-cloud-starter-feign</artifactId>
 			<optional>true</optional>
 		</dependency>
-		
-		
+
+
 		<!-- https://mvnrepository.com/artifact/com.alibaba/dubbo -->
 		<dependency>
-		    <groupId>com.alibaba</groupId>
-		    <artifactId>dubbo</artifactId>
-		    <version>2.6.4</version>
-		    <optional>true</optional>
+			<groupId>com.alibaba</groupId>
+			<artifactId>dubbo</artifactId>
+			<version>2.6.4</version>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
@@ -131,7 +131,7 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
-	
+
 	<distributionManagement>
 		<snapshotRepository>
 			<id>sonatype-nexus-snapshots</id>
@@ -142,7 +142,7 @@
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
 	</distributionManagement>
-	
+
 	<build>
 		<plugins>
 			<plugin>
@@ -153,7 +153,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-            <!--打包源代码-->
+			<!--打包源代码 -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -166,7 +166,7 @@
 					</execution>
 				</executions>
 			</plugin>
-            <!--生成javadoc-->
+			<!--生成javadoc -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -179,32 +179,32 @@
 					</execution>
 				</executions>
 				<configuration>
-                            <show>private</show>
-                            <nohelp>true</nohelp>
-                                    <charset>UTF-8</charset>
-	                <encoding>UTF-8</encoding>
-	                <docencoding>UTF-8</docencoding>
-	                <additionalparam>-Xdoclint:none</additionalparam>  <!-- TODO 临时解决不规范的javadoc生成报错,后面要规范化后把这行去掉 -->
-           		</configuration>
+					<show>private</show>
+					<nohelp>true</nohelp>
+					<charset>UTF-8</charset>
+					<encoding>UTF-8</encoding>
+					<docencoding>UTF-8</docencoding>
+					<additionalparam>-Xdoclint:none</additionalparam>  <!-- TODO 临时解决不规范的javadoc生成报错,后面要规范化后把这行去掉 -->
+				</configuration>
 			</plugin>
-            <!--获取本地私钥签名-->
+			<!--获取本地私钥签名 -->
 			<plugin>
-		      <groupId>org.apache.maven.plugins</groupId>
-		      <artifactId>maven-gpg-plugin</artifactId>
-		      <version>1.5</version>
-		      <executions>
-		        <execution>
-		          <id>sign-artifacts</id>
-		          <phase>verify</phase>
-		          <goals>
-		            <goal>sign</goal>
-		          </goals>
-		        </execution>
-		      </executions>
-		    </plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
-	
+
 	<profiles>
 		<profile>
 			<id>release</id>

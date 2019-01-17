@@ -29,7 +29,7 @@ public class ServiceRegisterResolver {
 			//生成该次分布式事务组的标识txKey，由于这里包含调用其他服务，所以命名为localTxKey
 			String localTxKey = redisHelper.createTxKey(TransactionContent.getServiceId());
 			// 初始化事务组回滚标识
-			redisHelper.opsForServiceError().txServiceNomal(localTxKey);
+			redisHelper.opsForServiceError().serviceNomal(localTxKey);
 			// 加入线程变量，后面的ServiceRunningHandler都将使用该localTxKey
 			TransactionContent.setLocalTxKey(localTxKey);
 			redisHelper.addToTxServiceSet(localTxKey , serviceCount);

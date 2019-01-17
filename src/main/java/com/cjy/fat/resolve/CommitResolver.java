@@ -87,7 +87,7 @@ public class CommitResolver {
 		long popTimes = getTryTimes(waitMilliesSeconds, commitBlankTime);
 		for (int i = 0; i < popTimes; i++) {
 			//先检测是否出错
-			redisHelper.opsForServiceError().isTxServiceError(txKey);
+			redisHelper.opsForServiceError().isServiceError(txKey);
 			boolean isPassed = redisHelper.opsForBlockMarkOperation().isBlockMarkPassed(txKey, markEnum);
 			if(isPassed) {
 				return true;
@@ -108,11 +108,6 @@ public class CommitResolver {
 	 * @param param
 	 */
 	public void clientProcced(FatServiceRegister txRegisterService, String remoteTxKey , String localTxKey ,String rootTxKey , String serviceId ){
-		
-		if(StringUtils.isNotBlank(localTxKey)){
-			redisHelper.opsForServiceError().isTxServiceError(localTxKey);
-		}
-		
 		//先通知父事务组
 		if(StringUtils.isNotBlank(remoteTxKey)){
 			this.clientCommonProcced(remoteTxKey, rootTxKey, serviceId);
@@ -125,7 +120,7 @@ public class CommitResolver {
 	}
 	
 	private void clientCommonProcced(String txKey , String rootTxKey , String serviceId) {
-		redisHelper.opsForServiceError().isTxServiceError(txKey);
+		redisHelper.opsForServiceError().isServiceError(txKey);
 		// 当前事务组完成时间 , 因为存在本地事务与服务调服务的时候，该协调交给发起者处理，不在ServieRunningHandler处理了
 		redisHelper.opsForServiceFinishTimeZsetOperation().addServiceFinishZSet(txKey, serviceId);
 		// 当前事务组时间线条件
@@ -152,12 +147,14 @@ public class CommitResolver {
 	 * @return
 	 * @throws InterruptedException
 	 */
-	public Object waitServiceResult(TransactionResolveParam param) throws InterruptedException {
+	public Object waitServiceResult(TransactionResolveParam param) throws Exception {
 		String serviceResult = null;
 		long tryTimes = getTryTimes(param.getWaitResultMilliesSeconds(), waitResultBlankTime);
 		for(int i = 0 ; i < tryTimes ; i++) {
 			//检查是否事务出错
-			redisHelper.opsForServiceError().isTxServiceError(param.getTxKey());
+			if(null != param.getLocalRunningException()) {
+				throw param.getLocalRunningException();
+			}
 			serviceResult = param.pollFromLocalResultQueue(waitResultBlankTime);
 			if(StringUtils.isNotBlank(serviceResult)) {
 				break;
@@ -167,14 +164,12 @@ public class CommitResolver {
 		if(StringUtils.isBlank(serviceResult)) {
 			boolean isPassed = redisHelper.opsForBlockMarkOperation().isBlockMarkPassed(param.getTxKey(), RedisKeyEnum.SERVICE_READYCOMMIT_MARK);
 			if(!isPassed) {
-				redisHelper.opsForServiceError().txServiceError(param.getTxKey());
-				redisHelper.opsForBlockMarkOperation().unPassBlockMark(param.getTxKey(), RedisKeyEnum.SERVICE_READYCOMMIT_MARK);
 				throw new FatTransactionException(param.getTxKey(), "wait result time out , transaction roll back ");
 			}
 			//不能阻止事务提交，进入等待
 			for(;;) {
 				//检查是否事务出错
-				redisHelper.opsForServiceError().isTxServiceError(param.getTxKey());
+				redisHelper.opsForServiceError().isServiceError(param.getTxKey());
 				serviceResult = param.pollFromLocalResultQueue(waitResultBlankTime);
 				if(StringUtils.isNotBlank(serviceResult)) {
 					break;
