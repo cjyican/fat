@@ -6,7 +6,7 @@
 
 	<groupId>com.github.cjyican</groupId>
 	<artifactId>fat-common</artifactId>
-	<version>1.0.0</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>fatboy-common</name>
