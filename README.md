@@ -11,7 +11,7 @@
 <dependency>
     <groupId>com.github.cjyican</groupId>
     <artifactId>fat-common</artifactId>
-    <version>1.0.0-RELEASE</version>
+    <version>1.0.2-RELEASE</version>
 </dependency>
 ```
 ## 使用示例
