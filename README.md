@@ -184,11 +184,11 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 	
 	/**
 	 * eg:dubbo:RpcContent.getAttachments();
-	 * @return
+	 * 在github的readme.md写代码是一种怎么样的体验
 	 */
 	public Map<String , String> convertRemoteDataToMap(){
-        return RpcContent.getAttachments();
-    }
+        	return RpcContent.getAttachments();
+   	}
 }
 ```
 
