@@ -85,7 +85,7 @@ public class ServiceRegisterAspect {
 		String rootTxKey = TransactionContent.getRootTxKey();
 		String serviceId = TransactionContent.getServiceId();
 
-		// 当存在远程事务 ， 本地事务时需要明确指定本地事务数量 , 若此时本地事务组依然存在元素，说明数量配置不正确
+		// 当存在远程事务 ， 本地事务时需要明确指定本地事务数量 , 若此时本地事务组依然存在元素，说明数量过多
 		if(txRegisterService.localTransactionCount() > 0){
 			if(TransactionContent.localTxQueueSize() > 0){
 				throw new FatTransactionException(localTxKey , "local transaction count is incorrect , which is more than real count" ); 

@@ -64,7 +64,7 @@ public class TransactionAspect {
 		}
 		//获取本地事务标识
 		localTxMark =  TransactionContent.pollLocalTxQueue();
-		//查看是否获取到本地事务标识，若获取不到，说明配置有误
+		//查看是否获取到本地事务标识，若获取不到，说明配置过少
 		if(StringUtils.isBlank(localTxMark)){
 			//localTxMark = serviceId;
 			throw new FatTransactionException(txKey , "could not poll localTxMark ,the config local transaction count is less than real count" ); 
