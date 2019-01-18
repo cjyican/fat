@@ -93,5 +93,6 @@ long waitResultMillisSeconds() default 3000;
 long waitCommitMillisSeconds() default 3000; 
 ```
 OK,到这里这个接口的服务链路已经完成了，可以跑起来了。简单吧，嘿嘿嘿。
-
-## 原理解析
+## 运行流程
+![头像](https://github.com/cjyican/img-respo/blob/master/TIM20190118153529.png)
+图不重要，重要的思想和代码，下面介绍一下FAT的一些设计和源码
