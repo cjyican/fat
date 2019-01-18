@@ -44,8 +44,8 @@ fat.redis.timeout=1000
 ```java
 spring.application.name=fatboy-eureka-ribbon
 ```
-### step2:服务接口加入注解@FatServiceRegister注册
-在需要开启分布式事务管理的接口/方法中加入注解@FatServiceRegister，注意不要重复添加。dubbo的直接加在service.method上面就可以了。
+### step2:服务入口方法加入注解@FatServiceRegister注册
+在需要开启分布式事务管理的入口方法中加入注解@FatServiceRegister，注意不要重复添加。dubbo的直接加在serviceImpl.method上面就可以了。
 ```java
 @RequestMapping("/user-service/{userId}/updateUserOrderNum1")
 @FatServiceRegister(serviceCount = 1 , localTransactionCount = 1)
@@ -191,10 +191,15 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
    	}
 }
 ```
+### 建议实践
+1,调用服务，建议把服务提取到事务方法外执行，比如feign，可以提取到controller中调用，避免事务耗时过长<br>
+2,调用多个服务时，建议把耗时长的服务优先调用<br>
+3,建议分开业务redis与注册中心redis，避免业务操作的redis IO压力过大
+
 
 ## 后续更新
 1，会持续更新维护
-2，打造FAT分布式事务管控平台FAT-monitor
+2，(学学前端？)打造FAT分布式事务管控平台FAT-monitor
 
 
 ## 结语
