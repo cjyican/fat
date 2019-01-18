@@ -1,10 +1,10 @@
 # fat
 FAT ,基于springboot , 使用redis , spring async , spring transactionManager的强一致性分布式事务解决方案
-## 项目介绍
-使用redis作为注册中心 ,spring async异步处理事务。<br>
+## 框架介绍
+使用redis作为注册中心 ,手动管理事务的执行，spring async异步处理事务。<br>
 纯编码方式，强一致性。<br>
 基于注解使用，对业务代码可以说是零入侵，目前内置适配spring-cloud(Feign调用) ， dubbo。<br>
-同时具备强大扩展性，因为存在自定义的服务框架，或者以后会涌现出更多的流行服务框架，所以会提供一些组件适配自定义服务框架。
+同时具备一定的扩展性与兼容性，因为存在自定义的服务框架，或者以后会涌现出更多的流行服务框架，所以会提供一些组件适配自定义服务框架。
 
 ## Maven依赖
 ```java
@@ -201,4 +201,5 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 （我前天才注册的gay佬hub...）<br>
 FAT是我第一次学java来投入如此大心血写的框架，也是我职业生涯第一个开源作品吧，不论好与坏，我都为之自豪，成就感爆棚。<br>
 迫不及待想与大家分享，如同小孩吃糖一般<br>
-希望可以相互学习，互相交流!
+希望可以相互学习，互相交流!<br>
+thand you for your star.
