@@ -86,11 +86,9 @@ public class ServiceRegisterAspect {
 		String serviceId = TransactionContent.getServiceId();
 
 		// 当存在远程事务 ， 本地事务时需要明确指定本地事务数量 , 若此时本地事务组依然存在元素，说明数量配置不正确
-		if(StringUtils.isNotBlank(remoteTxKey) && StringUtils.isNotBlank(localTxKey)){
-			if(TransactionContent.pollLocalTxQueue() != null){
-				int confLocalTxNum = txRegisterService.localTransactionCount();
-				int realLocalTxNum = confLocalTxNum - TransactionContent.localTxQueueSize();
-				throw new FatTransactionException(localTxKey , "local transaction group count is incorrect , real count maybe " + realLocalTxNum); 
+		if(txRegisterService.localTransactionCount() > 0){
+			if(TransactionContent.localTxQueueSize() > 0){
+				throw new FatTransactionException(localTxKey , "local transaction count is incorrect , which is more than real count" ); 
 			}
 		}
 		commitResolver.clientProcced(txRegisterService, remoteTxKey, localTxKey, rootTxKey, serviceId);

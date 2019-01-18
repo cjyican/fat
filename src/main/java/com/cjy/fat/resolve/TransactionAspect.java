@@ -52,14 +52,8 @@ public class TransactionAspect {
 		//获取TxKey , 当该接口具有本地事务时使用LocalKey , 当localKey不存在，说明不需要使用本地事务 ， 使用remoteKey
 		String txKey = TransactionContent.getLocalTxKey();
 		String rootTxKey = TransactionContent.getRootTxKey();
-		String serviceId = TransactionContent.getServiceId();
+		//String serviceId = TransactionContent.getServiceId();
 		String localTxMark = null ;
-		//获取本地事务标识
-		localTxMark =  TransactionContent.pollLocalTxQueue();
-		//查看是否获取到本地事务标识，若获取不到，则使用applicationName 
-		if(StringUtils.isBlank(localTxMark)){
-			localTxMark = serviceId;
-		}
 		if(StringUtils.isBlank(txKey)){
 			//没有localTxKey说明这个仅仅作为服务被调用，不再调用其它服务，则该次分布式事务组的标识为远程传过来的remoteTxKey
 			txKey = TransactionContent.getRemoteTxKey();
@@ -67,6 +61,13 @@ public class TransactionAspect {
 		//当txKey不存在时，没有远程穿过的，也没有本地生成的，说明客户端没有开启分布式事务 , 直接运行
 		if(StringUtils.isBlank(txKey)){
 			return proceedingJoinPoint.proceed();
+		}
+		//获取本地事务标识
+		localTxMark =  TransactionContent.pollLocalTxQueue();
+		//查看是否获取到本地事务标识，若获取不到，说明配置有误
+		if(StringUtils.isBlank(localTxMark)){
+			//localTxMark = serviceId;
+			throw new FatTransactionException(txKey , "could not poll localTxMark ,the config local transaction count is less than real count" ); 
 		}
 		Method serviceMethod = signature.getMethod();
 		Transactional transactionalAnno = serviceMethod.getAnnotation(Transactional.class);
