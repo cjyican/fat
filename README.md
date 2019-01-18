@@ -1,5 +1,5 @@
 # fat
-基于springboot , 使用redis , spring async的强一致性分布式事务解决方案
+基于springboot , 使用redis , spring async , spring transactionManager的强一致性分布式事务解决方案
 ## 项目介绍
 使用redis作为注册中心 ,spring async异步处理事务。<br>
 纯编码方式，强一致性。<br>
