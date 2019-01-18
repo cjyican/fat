@@ -202,4 +202,4 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 FAT是我第一次学java来投入如此大心血写的框架，也是我职业生涯第一个开源作品吧，不论好与坏，我都为之自豪，成就感爆棚。<br>
 迫不及待想与大家分享，如同小孩吃糖一般<br>
 希望可以相互学习，互相交流!<br>
-thand you for your star.
+thank you for your star.
