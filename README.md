@@ -66,7 +66,7 @@ int localTransactionCount() default 0;
  */
 int serviceCount() default 0;
 ```
-### step2:业务方法加注解@FatTransaction纳入分布式管控
+### step3:业务方法加注解@FatTransaction纳入分布式管控
 注意@FatTransaction必须要与@Transactional配合使用已获取用户配置的事务信息，否则将会报错
 ```java
 @FatTransaction
