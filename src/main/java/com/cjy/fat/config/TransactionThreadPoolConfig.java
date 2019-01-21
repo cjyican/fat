@@ -11,16 +11,16 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class TransactionThreadPoolConfig {
 	
-	@Value("${fb.thread.core_pool_size:20}")
+	@Value("${fat.thread.core_pool_size:20}")
 	private int corePoolSize ;
 	
-	@Value("${fb.thread.max_pool_size:50}")
+	@Value("${fat.thread.max_pool_size:50}")
 	private int maxPoolSize ;
 	
-	@Value("${fb.thread.queue_capacity:200}")
+	@Value("${fat.thread.queue_capacity:200}")
 	private int queueCapacity ;
 	
-	@Value("${fb.thread.keep_alive_seconds:60}")
+	@Value("${fat.thread.keep_alive_seconds:60}")
 	private int keepAliveSeconds;
 
 	@Bean

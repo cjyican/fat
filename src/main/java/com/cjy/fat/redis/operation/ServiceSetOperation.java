@@ -1,4 +1,4 @@
-package com.cjy.fat.redis;
+package com.cjy.fat.redis.operation;
 
 public interface ServiceSetOperation {
 	

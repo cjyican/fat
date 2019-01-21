@@ -1,4 +1,4 @@
-package com.cjy.fat.resolve.accept;
+package com.cjy.fat.resolve;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.data.TransactionContent;
+import com.cjy.fat.resolve.accept.RemoteTransactionAccepter;
 
 @Component
 public class RemoteTransactionDataResolver {

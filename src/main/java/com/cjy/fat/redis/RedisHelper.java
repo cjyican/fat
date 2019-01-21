@@ -11,6 +11,18 @@ import org.springframework.stereotype.Component;
 
 import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.redis.constant.RedisKeyEnum;
+import com.cjy.fat.redis.operation.BlockMarkOperation;
+import com.cjy.fat.redis.operation.CanCommitListOperation;
+import com.cjy.fat.redis.operation.GroupCanCommitListOperation;
+import com.cjy.fat.redis.operation.GroupFinishSetOperation;
+import com.cjy.fat.redis.operation.GroupKeySetOperation;
+import com.cjy.fat.redis.operation.GroupServiceSetOperation;
+import com.cjy.fat.redis.operation.ServiceCanCommitZSetOperation;
+import com.cjy.fat.redis.operation.ServiceCancommitListOperation;
+import com.cjy.fat.redis.operation.ServiceErrorOperation;
+import com.cjy.fat.redis.operation.ServiceFinishTimeZsetOperation;
+import com.cjy.fat.redis.operation.ServiceReadyCommitListOperation;
+import com.cjy.fat.redis.operation.ServiceSetOperation;
 import com.cjy.fat.util.CollectionUtil;
 import com.cjy.fat.util.StringUtil;
 
@@ -135,7 +147,6 @@ public class RedisHelper {
 		return redis.opsForList().leftPop(RedisHelper.initTxRedisKey(keyEnum, txKey), waitMilliesSecond, TimeUnit.MILLISECONDS);
 	}
 	
-	//事务吃错标识操作接口
 	private ServiceErrorOperation serviceErrorOperation;
 	
 	public ServiceErrorOperation opsForServiceError() {
@@ -227,6 +238,21 @@ public class RedisHelper {
 		return serviceReadyCommitListOperation;
 	}
 	
+	private ServiceCancommitListOperation serviceCancommitListOperation;
+	
+	public ServiceCancommitListOperation opsForServiceCancommitListOperation() {
+		if(null == serviceCancommitListOperation ) {
+			serviceCancommitListOperation = new ServiceCancommitListOperation() {
+				@Override
+				public void pushServiceSetToCancommitList(String txKey) {
+					// TODO Auto-generated method stub
+					pushToBlockListFromSet(txKey, RedisKeyEnum.SERVICE_SET,txKey, RedisKeyEnum.SERVICE_CANCOMMIT_LIST);
+				}
+			};
+		}
+		return serviceCancommitListOperation;
+	}
+	
 	private GroupCanCommitListOperation groupCanCommitListOperation;
 	
 	public GroupCanCommitListOperation opsForGroupCanCommitListOperation() {
@@ -239,10 +265,6 @@ public class RedisHelper {
 				@Override
 				public String popGroupCancommit(String rootTxKey, long waitMilliesSecond) {
 					return redis.opsForList().leftPop(RedisHelper.initTxRedisKey(RedisKeyEnum.GROUP_CANCOMMIT_LIST, rootTxKey), waitMilliesSecond, TimeUnit.MILLISECONDS);
-				}
-				@Override
-				public void pushServiceSetToGroupCommitList(String txKey, String rootTxKey) {
-					pushToBlockListFromSet(txKey, RedisKeyEnum.SERVICE_SET, rootTxKey, RedisKeyEnum.GROUP_CANCOMMIT_LIST);
 				}
 			};
 		}

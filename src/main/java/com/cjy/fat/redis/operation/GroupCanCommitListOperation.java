@@ -1,4 +1,4 @@
-package com.cjy.fat.redis;
+package com.cjy.fat.redis.operation;
 
 public interface GroupCanCommitListOperation {
 	
@@ -15,9 +15,5 @@ public interface GroupCanCommitListOperation {
 	 */
 	public String popGroupCancommit(String rootTxKey , long waitMilliesSecond) ;
 	
-	/**
-	 * 将当前txKey维护的serviceSet元素加入到groupCommitList
-	 */
-	public void pushServiceSetToGroupCommitList(String txKey , String rootTxKey);
 	
 }

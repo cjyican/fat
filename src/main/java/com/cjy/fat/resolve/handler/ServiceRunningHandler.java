@@ -50,9 +50,9 @@ public class ServiceRunningHandler {
 			redisHelper.opsForServiceError().isServiceError(param.getTxKey());
 			Object result = joinPoint.proceed();
 			String resultJSON = JSONObject.toJSONString(result);
-			Logger.info("{}-service is finished , transaction is waiting for commit,service result:{}", param.getLocalTxMark(), resultJSON);
-			// 写入执行结果，提供给其他服务的参数使用 ,改用本地阻塞式队列
+			// 写入执行结果返回主线程 ,改用本地阻塞式队列
 			param.offerToLocalResultQueue(resultJSON);
+			Logger.info("{}-service is finished , transaction is waiting for commit,service result:{}", param.getLocalTxMark(), resultJSON);
 			// 交给事务提交处理器处理可提交逻辑
 			commitResolver.blockProceed(param);
 			transactionManager.commit(transStatus);

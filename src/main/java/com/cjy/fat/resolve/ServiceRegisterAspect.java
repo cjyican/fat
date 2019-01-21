@@ -19,7 +19,6 @@ import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.redis.RedisHelper;
 import com.cjy.fat.redis.constant.RedisKeyEnum;
-import com.cjy.fat.resolve.accept.RemoteTransactionDataResolver;
 
 @Aspect
 @Component

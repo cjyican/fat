@@ -1,4 +1,4 @@
-package com.cjy.fat.redis;
+package com.cjy.fat.redis.operation;
 
 import com.cjy.fat.redis.constant.RedisKeyEnum;
 
