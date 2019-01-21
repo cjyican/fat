@@ -43,8 +43,7 @@ public class CommitResolver {
 			redisHelper.opsForServiceReadyCommitListOperation().pushServiceSetToReadCommitList(param.getTxKey());
 			redisHelper.opsForGroupFinishSetOperation().addGroupFinishSet(param.getRootTxKey(), param.getTxKey());
 			// 当事务分组协调器维护的txkey数量等于完成数量的时候 ， 告诉各localTxKey可以提交
-			if (redisHelper.opsForGroupFinishSetOperation().sizeGroupFinishSet(param.getRootTxKey()) == redisHelper
-					.opsForGroupKeySetOperation().sizeGroupKeySet(param.getRootTxKey())) {
+			if(redisHelper.opsForGroupFinishSetOperation().isGroupFinishZSetFull(param.getRootTxKey())) {	
 				redisHelper.opsForGroupCanCommitListOperation().pushGroupServiceSetToGroupCommitList(param.getRootTxKey());
 			}
 		}
