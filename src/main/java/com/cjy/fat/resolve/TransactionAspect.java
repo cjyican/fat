@@ -46,14 +46,11 @@ public class TransactionAspect {
 	@Around("txService(txService)")
 	public Object doAround(JoinPoint joinPoint, FatTransaction txService) throws Throwable {
 		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-		Class<?> returnType = signature.getReturnType();
 		ProceedingJoinPoint proceedingJoinPoint = (ProceedingJoinPoint) joinPoint;
 		
 		//获取TxKey , 当该接口具有本地事务时使用LocalKey , 当localKey不存在，说明不需要使用本地事务 ， 使用remoteKey
 		String txKey = TransactionContent.getLocalTxKey();
 		String rootTxKey = TransactionContent.getRootTxKey();
-		//String serviceId = TransactionContent.getServiceId();
-		String localTxMark = null ;
 		if(StringUtils.isBlank(txKey)){
 			//没有localTxKey说明这个仅仅作为服务被调用，不再调用其它服务，则该次分布式事务组的标识为远程传过来的remoteTxKey
 			txKey = TransactionContent.getRemoteTxKey();
@@ -63,10 +60,9 @@ public class TransactionAspect {
 			return proceedingJoinPoint.proceed();
 		}
 		//获取本地事务标识
-		localTxMark =  TransactionContent.pollLocalTxQueue();
+		String localTxMark =  TransactionContent.pollLocalTxQueue();
 		//查看是否获取到本地事务标识，若获取不到，说明配置过少
 		if(StringUtils.isBlank(localTxMark)){
-			//localTxMark = serviceId;
 			throw new FatTransactionException(txKey , "could not poll localTxMark ,the config local transaction count is less than real count" ); 
 		}
 		Method serviceMethod = signature.getMethod();
@@ -79,8 +75,7 @@ public class TransactionAspect {
 				localTxMark, 
 				rootTxKey, 
 				txService.waitCommitMillisSeconds(), 
-				txService.waitResultMillisSeconds(),
-				returnType);
+				txService.waitResultMillisSeconds());
 		// 异步执行业务操作
 		serviceHandler.proceed(proceedingJoinPoint , transactionalAnno, param ,TransactionContent.buildRemoteData());
 		return commitResolver.waitServiceResult(param);

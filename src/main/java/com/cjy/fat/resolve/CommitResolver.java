@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
 import com.cjy.fat.annotation.FatServiceRegister;
 import com.cjy.fat.data.TransactionResolveParam;
 import com.cjy.fat.exception.FatTransactionException;
@@ -153,7 +152,7 @@ public class CommitResolver {
 	 * @throws InterruptedException
 	 */
 	public Object waitServiceResult(TransactionResolveParam param) throws Exception {
-		String serviceResult = null;
+		Object serviceResult = null;
 		long tryTimes = getTryTimes(param.getWaitResultMilliesSeconds(), waitResultBlankTime);
 		for(int i = 0 ; i < tryTimes ; i++) {
 			//检查是否事务出错
@@ -161,12 +160,12 @@ public class CommitResolver {
 				throw param.getLocalRunningException();
 			}
 			serviceResult = param.pollFromLocalResultQueue(waitResultBlankTime);
-			if(StringUtils.isNotBlank(serviceResult)) {
+			if(null != serviceResult) {
 				break;
 			}
 		}
 		//等待超时，查看是否可以阻止事务提交
-		if(StringUtils.isBlank(serviceResult)) {
+		if(null == serviceResult) {
 			boolean isPassed = redisHelper.opsForBlockMarkOperation().isBlockMarkPassed(param.getTxKey(), RedisKeyEnum.SERVICE_READYCOMMIT_MARK);
 			if(!isPassed) {
 				throw new FatTransactionException(param.getTxKey(), "wait result time out , transaction roll back ");
@@ -176,12 +175,12 @@ public class CommitResolver {
 				//检查是否事务出错
 				redisHelper.opsForServiceError().isServiceError(param.getTxKey());
 				serviceResult = param.pollFromLocalResultQueue(waitResultBlankTime);
-				if(StringUtils.isNotBlank(serviceResult)) {
+				if(null != serviceResult) {
 					break;
 				}
 			}
 		}
-		return JSONObject.parseObject(serviceResult, param.getReturnType());
+		return serviceResult;
 	}
 
 }

@@ -29,10 +29,6 @@ public class TransactionResolveParam {
 	 */
 	private long waitCommitMilliesSeconds;
 	/**
-	 * 业务方法返回类型
-	 */
-	private Class<?> returnType;
-	/**
 	 * 等待业务操作结果时常，注意，当服务已经完成业务操作，该等待操作不允许影响整个事务组的提交与回滚
 	 */
 	private long waitResultMilliesSeconds;
@@ -40,20 +36,20 @@ public class TransactionResolveParam {
 	 * 业务方法返回值监听队列
 	 * @return
 	 */
-	private BlockingQueue<String> localResultQueue ;
+	private BlockingQueue<Object> localResultQueue ;
+	
 	/**
 	 * 在执行业务方法时抛出的异常，在主线程中不再使用redis接收
 	 */
 	private Exception localRunningException;
 
 	public TransactionResolveParam(String txKey, String localTxMark, String rootTxKey,
-			long waitCommitMilliesSeconds, long waitResultMilliesSeconds , Class<?> returnType) {
+			long waitCommitMilliesSeconds, long waitResultMilliesSeconds) {
 		super();
 		this.txKey = txKey;
 		this.localTxMark = localTxMark;
 		this.rootTxKey = rootTxKey;
 		this.waitCommitMilliesSeconds = waitCommitMilliesSeconds;
-		this.returnType = returnType;
 		this.waitResultMilliesSeconds = waitResultMilliesSeconds;
 		localResultQueue = new ArrayBlockingQueue<>(1);
 	}
@@ -72,14 +68,6 @@ public class TransactionResolveParam {
 	
 	public void setWaitResultMilliesSeconds(long waitResultMilliesSeconds) {
 		this.waitResultMilliesSeconds = waitResultMilliesSeconds;
-	}
-
-	public Class<?> getReturnType() {
-		return returnType;
-	}
-	
-	public void setReturnType(Class<?> returnType) {
-		this.returnType = returnType;
 	}
 	
 	public long getWaitCommitMilliesSeconds() {
@@ -109,11 +97,11 @@ public class TransactionResolveParam {
 		this.rootTxKey = rootTxKey;
 	}
 	
-	public String pollFromLocalResultQueue(long timeOut) throws InterruptedException {
+	public Object pollFromLocalResultQueue(long timeOut) throws InterruptedException {
 		return localResultQueue.poll(timeOut, TimeUnit.MILLISECONDS);
 	}
 	
-	public void offerToLocalResultQueue(String result) {
+	public void offerToLocalResultQueue(Object result) {
 		localResultQueue.offer(result);
 	}
 	
