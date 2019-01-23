@@ -11,10 +11,24 @@ FAT ,基于springboot , 使用redis , spring async , spring transactionManager�
 <dependency>
     <groupId>com.github.cjyican</groupId>
     <artifactId>fat-common</artifactId>
-    <version>1.0.2-RELEASE</version>
+    <version>1.0.5-RELEASE</version>
 </dependency>
 ```
 ## 使用示例
+### step0:SpringBootApplication加上@EnableFat注解
+```java
+@SpringBootApplication
+@EnableEurekaClient
+@EnableDiscoveryClient
+@EnableFeignClients
+@EnableFat
+public class FatboyEurekaRibbonApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(FatboyEurekaRibbonApplication.class, args);
+	}
+}
+```
 ### step1:配置注册中心
 使用redis作为注册中心，所以需要引入配置redis，暂未适配集群模式。为隔离业务使用的redis和注册中心的redis，提供了一套属性配置。
 在业务redis与注册中心相同时，也需要配置。
@@ -206,10 +220,26 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
    	}
 }
 ```
-### 建议实践
+## 建议实践
 1,调用服务，建议把服务提取到事务方法外执行，比如feign，可以提取到controller中调用，避免事务耗时过长<br>
 2,调用多个服务时，建议把耗时长的服务优先调用<br>
 3,建议分开业务redis与注册中心redis，避免业务操作的redis IO压力过大
+
+## 版本历史
+### v1.0.5
+>|-注册中心属性名变更（不兼容旧版本） fb.redis.xx --> fat.redis.xx<br>
+>|-添加@EnableFat注解使用，Fat分布式事务开关，ps:在dubbo场景中，因为使用的是SPI自定义Filter，在添加了fat的依赖，却不添加@EnableFat注解的话会报错。<br>
+>|-性能优化: <br>
+>>1，本地业务操作等待返回值，不再需要使用JSON序列化，提高主线程等待速度，事务协调速度<br>
+>>2，分布式事务协调过程的阻塞过程优化，此前为三段阻塞确认（参看上文的‘性能分析’）优化为两段阻塞监听:<br>
+>>>>阶段1：本地业务完成的等待阻塞。此阻塞发生在当本地业务操作完成后，进行阻塞监听注册中心所在事务协调器，等待所在事务组所有服务完成业务操作。该阻塞监听将会有超时限制。此阶段出现业务异常 OR 某服务挂了 OR 注册中心挂了 OR 客户端挂了 OR 等待超时,都会由于事务确认机制而回滚，确保一致。但某个服务挂了，由于该服务的事务尚未完成，需要DB手工操作。<br>
+>>>><br>
+>>>>阶段2，各事务组完成后，分组协调器的阻塞。此阻塞发生在所在事务组，所有服务已经完成其业务操作，监听注册中心事务分组协调器等待其他事务组整体完成的节点。此阻塞监听不会有超时限制。此阶段出现业务异常 OR 某服务 OR 注册中心 OR 客户端 OR 等待超时,都会由于事务确认机制而回滚，确保一致。但某个服务挂了，由于该服务的事务尚未完成，需要DB手工操作。<br>
+>>>><br>
+>>>>阶段2后说明整个事务链路已经可以提交，注册中心挂了，已经获取到提交标识的，提交不影响，未提交的事务（已经设置事务超时时间的将会回滚，未设置的，将会保持，需要DB手工操作），服务之间再无联系。
+
+### v1.0.2
+  |-第一个稳定版本
 
 
 ## 后续更新
