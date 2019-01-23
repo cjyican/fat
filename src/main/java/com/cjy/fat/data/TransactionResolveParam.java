@@ -17,7 +17,7 @@ public class TransactionResolveParam {
 	 */
 	private String txKey;
 	/**
-	 * 本地事务标识，不存在本地事务将使用appicationName
+	 * 本地事务标识
 	 */
 	private String localTxMark;
 	/**
@@ -52,6 +52,14 @@ public class TransactionResolveParam {
 		this.waitCommitMilliesSeconds = waitCommitMilliesSeconds;
 		this.waitResultMilliesSeconds = waitResultMilliesSeconds;
 		localResultQueue = new ArrayBlockingQueue<>(1);
+	}
+	
+	/**
+	 * 出错时，判断是否需要通知rootTxKey
+	 * @return
+	 */
+	public boolean needToNotifyRootTxKey() {
+		return this.txKey.equals(this.rootTxKey);
 	}
 	
 	public Exception getLocalRunningException() {

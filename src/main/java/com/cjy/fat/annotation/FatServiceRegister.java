@@ -36,9 +36,9 @@ public @interface FatServiceRegister {
 	
 	/**
 	 * 服务数量
-	 * A-->B,A-->C ;A.serviceCount==2,B/C.serviceCoun==0
-	 * A-->B,A-->B ;A.serviceCount==2,B.serviceCoun==0
-	 * A-->B,B-->C ;A.serviceCont==1,B.serviceCont==1,C.serviceCount==0
+	 * A-->B,A-->C ;A.serviceCount==2,B/C.serviceCount==0
+	 * A-->B,A-->B ;A.serviceCount==2,B.serviceCount==0
+	 * A-->B,B-->C ;A.serviceCount==1,B.serviceConnt==1,C.serviceCount==0
 	 */
 	int serviceCount() default 0;
 }

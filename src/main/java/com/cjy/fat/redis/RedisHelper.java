@@ -164,7 +164,7 @@ public class RedisHelper {
 				public void isServiceError(String txKey) {
 					boolean isError = redis.opsForValue().get(RedisHelper.initTxRedisKey(RedisKeyEnum.IS_SERVICE_ERROR, txKey)).equals(ERROR);
 					if(isError){
-						throw new FatTransactionException(txKey , txKey+" occured other transaction error when runnning local transaction");
+						throw new FatTransactionException(txKey , txKey + " other service occured error when runnning local transaction");
 					}
 				}
 			};

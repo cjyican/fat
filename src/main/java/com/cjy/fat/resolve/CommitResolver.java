@@ -108,7 +108,7 @@ public class CommitResolver {
 				return true;
 			}
 		}
-		throw new FatTransactionException(txKey, txKey+" local service is finished , wait for commit timeout");
+		throw new FatTransactionException(txKey, txKey+" local transaction is finished, wait for commit timeout");
 	}
 	
 	private long getTryTimes(long waitMilliesSeconds , long blankTime) {
@@ -122,7 +122,7 @@ public class CommitResolver {
 	 * @param param
 	 */
 	public void clientProcced(FatServiceRegister txRegisterService, String remoteTxKey , String localTxKey ,String rootTxKey , String serviceId ){
-		//先通知父事务组
+		//先通知上层事务组
 		if(StringUtils.isNotBlank(remoteTxKey)){
 			this.clientCommonProcced(remoteTxKey, rootTxKey, serviceId);
 		}
