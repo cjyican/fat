@@ -147,16 +147,16 @@ https://github.com/cjyican/fat/blob/master/src/main/java/com/cjy/fat/resolve/Com
 ### 事务处理的线程池
 FAT使用Sping Async处理事务流程，自然需要用到线程池，线程池默认有配置，也可以根据项目运行情况自定义，以下为配置信息
 ```java
-@Value("${fb.thread.core_pool_size:20}")
+@Value("${fat.thread.core_pool_size:20}")
 private int corePoolSize ;
 
-@Value("${fb.thread.max_pool_size:50}")
+@Value("${fat.thread.max_pool_size:50}")
 private int maxPoolSize ;
 
-@Value("${fb.thread.queue_capacity:200}")
+@Value("${fat.thread.queue_capacity:200}")
 private int queueCapacity ;
 
-@Value("${fb.thread.keep_alive_seconds:60}")
+@Value("${fat.thread.keep_alive_seconds:60}")
 private int keepAliveSeconds;
 ```
 ### 监听事务执行情况，业务结果的间歇时间
@@ -227,7 +227,7 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 
 ## 版本历史
 ### v1.0.5
->|-注册中心属性名变更（不兼容旧版本） fb.redis.xx --> fat.redis.xx<br>
+>|-FAT处理事务的线程池配置属性名变更（不兼容旧版本） fb.thread.xx --> fat.thread.xx<br>
 >|-添加@EnableFat注解使用，Fat分布式事务开关，ps:在dubbo场景中，因为使用的是SPI自定义Filter，在添加了fat的依赖，却不添加@EnableFat注解的话会报错。<br>
 >|-性能优化: <br>
 >>1，本地业务操作等待返回值，不再需要使用JSON序列化，提高主线程等待速度，事务协调速度<br>
@@ -235,6 +235,7 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 >>3，本地异常捕捉提高准确度，事务执行线程的异常将通过地址传递到主线程，服务响应速度更快，异常信息更准确<br>
 >>4，分布式事务协调过程的阻塞过程优化，此前为三段阻塞确认（参看上文的‘性能分析’）优化为两段阻塞监听:<br>
 >>5，由于以上优化，注册中心redis将会更节省空间，减缓IO压力<br>
+>>6，支持自定义的事务管理器，JpaTransactionManager,DataSourceTransactionManager
 >>>>阶段1：本地业务完成的等待阻塞。此阻塞发生在当本地业务操作完成后，进行阻塞监听注册中心所在事务协调器，等待所在事务组所有服务完成业务操作。该阻塞监听将会有超时限制。此阶段出现业务异常 OR 某服务挂了 OR 注册中心挂了 OR 客户端挂了 OR 等待超时,都会由于事务确认机制而回滚，确保一致。但某个服务挂了，由于该服务的事务尚未完成，需要DB手工操作。<br>
 >>>><br>
 >>>>阶段2，各事务组完成后，分组协调器的阻塞。此阻塞发生在所在事务组，所有服务已经完成其业务操作，监听注册中心事务分组协调器等待其他事务组整体完成的节点。此阻塞监听不会有超时限制。此阶段出现业务异常 OR 某服务 OR 注册中心 OR 客户端 OR 等待超时,都会由于事务确认机制而回滚，确保一致。但某个服务挂了，由于该服务的事务尚未完成，需要DB手工操作。<br>
