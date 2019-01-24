@@ -18,7 +18,7 @@ import com.cjy.fat.redis.RedisHelper;
  *
  */
 @Component
-@ConditionalOnBean(type = {"com.cjy.common.resolve.accept.CustomRemoteDataAdapter"})
+@ConditionalOnBean(type = {"com.cjy.fat.resolve.accept.CustomRemoteDataAdapter"})
 public class CustomRemoteTransactionAccepter implements RemoteTransactionAccepter{
 	
 	@Autowired
