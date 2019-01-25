@@ -11,7 +11,7 @@ FAT ,基于springboot , 使用redis , spring async , spring transactionManager�
 <dependency>
     <groupId>com.github.cjyican</groupId>
     <artifactId>fat-common</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>1.0.6-RELEASE</version>
 </dependency>
 ```
 ## 使用示例
