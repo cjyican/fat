@@ -30,7 +30,7 @@ public class FatboyEurekaRibbonApplication {
 }
 ```
 ### step1:配置注册中心
-使用redis作为注册中心，所以需要引入配置redis，暂未适配集群模式。为隔离业务使用的redis和注册中心的redis，提供了一套属性配置。
+使用redis作为注册中心，所以需要引入配置redis。为隔离业务使用的redis和注册中心的redis，提供了一套属性配置。
 在业务redis与注册中心相同时，也需要配置。
 请保证各个服务的注册中心配置一致，否则无法协调分布式事务。
 ```java
@@ -230,7 +230,7 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 
 ## 版本历史
 ### v1.0.6
->|修复上个版本自定义服务api，无法获取到分布式事务上下文的bug
+>|修复上个版本自定义服务api，无法获取到分布式事务上下文的bug<br>
 >|支持注册中心集群模式，参看上文（使用示例）
 ### v1.0.5
 >|-FAT处理事务的线程池配置属性名变更（不兼容旧版本） fb.thread.xx --> fat.thread.xx<br>
