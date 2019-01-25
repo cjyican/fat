@@ -1,28 +1,32 @@
 package com.cjy.fat.config;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.connection.RedisClusterConfiguration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import com.cjy.fat.util.CollectionUtil;
 
 import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
 public class RedisConfig {
 
-	@Value("${fat.redis.host}")
+	@Value("${fat.redis.host:127.0.0.1}")
 	private String host;
 
 	@Value("${fat.redis.database:0}")
 	private int database;
 
-	@Value("${fat.redis.port}")
+	@Value("${fat.redis.port:6379}")
 	private int port;
 
-	@Value("${fat.redis.password}")
+	@Value("${fat.redis.password:}")
 	private String password;
 
 	@Value("${fat.redis.timeout:-1}")
@@ -40,6 +44,12 @@ public class RedisConfig {
 	@Value("${fat.redis.pool.min-idle:5}")
 	private int minIdle;
 	
+	@Value("${fat.redis.cluster.nodes:}")
+	private String clusterNodes;
+	
+	@Value("${fat.redis.cluster.max-redirects:0}")
+	private int maxRedirects;
+	
 	@Bean
 	public RedisTemplate<String, Object> fatRedis() { 
 		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<String, Object>(); 
@@ -53,16 +63,36 @@ public class RedisConfig {
 	}
 
 	public RedisConnectionFactory connectionFactory() {
-		JedisConnectionFactory jedis = new JedisConnectionFactory();
+		JedisConnectionFactory jedis = null;
+		RedisClusterConfiguration clusterConfig = buildRedisClusterConfig();
+		if(null != clusterConfig) {
+			jedis = new JedisConnectionFactory(clusterConfig);
+		}else{
+			jedis = new JedisConnectionFactory();
+		}
 		jedis.setHostName(host);
 		jedis.setPort(port);
-		jedis.setPassword(password);
+		if(StringUtils.isNotBlank(StringUtils.trim(password))) {
+			jedis.setPassword(password);
+		}
 		jedis.setDatabase(database);
 		jedis.setTimeout(timeout);
 		jedis.setPoolConfig(this.poolCofig()); // 初始化连接pool
 		jedis.afterPropertiesSet();
 		RedisConnectionFactory factory = jedis;
 		return factory;
+	}
+	
+	public RedisClusterConfiguration buildRedisClusterConfig() {
+		if(StringUtils.isNotBlank(StringUtils.trim(clusterNodes))) {
+			RedisClusterConfiguration clusterConfigeration = new RedisClusterConfiguration(CollectionUtil.covertStringToCollection(clusterNodes));
+			if(maxRedirects == 0){
+				maxRedirects = clusterConfigeration.getClusterNodes().size();
+			}
+			clusterConfigeration.setMaxRedirects(maxRedirects);
+			return clusterConfigeration;
+		}
+		return null;
 	}
 
 	public JedisPoolConfig poolCofig() {
