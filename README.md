@@ -1,8 +1,8 @@
 # fat
 FAT ,基于springboot , 使用redis , spring async , spring transactionManager的强一致性分布式事务解决方案
 ## 框架介绍
-使用redis作为注册中心 ,手动管理事务的执行，spring async异步处理事务。<br>
 纯编码方式，强一致性。<br>
+使用redis作为注册中心 ,代理事务的执行，使用spring async异步处理事务线程。<br>
 基于注解使用，对业务代码可以说是零入侵，目前内置适配spring-cloud(Feign调用) ， dubbo。<br>
 同时具备一定的扩展性与兼容性，因为存在自定义的服务框架，或者以后会涌现出更多的流行服务框架，所以会提供一些组件适配自定义服务框架。
 
