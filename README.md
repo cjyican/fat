@@ -230,8 +230,8 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 
 ## 版本历史
 ### v1.0.6
->|修复上个版本自定义服务api，无法获取到分布式事务上下文的bug<br>
->|支持注册中心集群模式，参看上文（使用示例）
+>|-修复上个版本自定义服务api，无法获取到分布式事务上下文的bug<br>
+>|-支持注册中心集群模式，参看上文（使用示例）
 ### v1.0.5
 >|-FAT处理事务的线程池配置属性名变更（不兼容旧版本） fb.thread.xx --> fat.thread.xx<br>
 >|-添加@EnableFat注解使用，Fat分布式事务开关，ps:在dubbo场景中，因为使用的是SPI自定义Filter，在添加了fat的依赖，却不添加@EnableFat注解的话会报错。<br>
