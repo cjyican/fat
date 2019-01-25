@@ -53,6 +53,9 @@ fat.redis.pool.max-idle=10
 fat.redis.pool.min-idle=2
 # 连接超时时间（毫秒）
 fat.redis.timeout=1000 
+# 集群模式,如有配置，将优先使用集群
+fat.redis.cluster.nodes=x.x.x.x:x,x.x.x.x:x
+
 ```
 应用标识，与spirng.application.name一致，必须配置
 ```java
@@ -226,6 +229,9 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 3,建议分开业务redis与注册中心redis，避免业务操作的redis IO压力过大
 
 ## 版本历史
+### v1.0.6
+>|修复上个版本自定义服务api，无法获取到分布式事务上下文的bug
+>|支持注册中心集群模式，参看上文（使用示例）
 ### v1.0.5
 >|-FAT处理事务的线程池配置属性名变更（不兼容旧版本） fb.thread.xx --> fat.thread.xx<br>
 >|-添加@EnableFat注解使用，Fat分布式事务开关，ps:在dubbo场景中，因为使用的是SPI自定义Filter，在添加了fat的依赖，却不添加@EnableFat注解的话会报错。<br>
