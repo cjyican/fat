@@ -226,7 +226,8 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 ## 建议实践
 1,调用服务，建议把服务提取到事务方法外执行，比如feign，可以提取到controller中调用，避免事务耗时过长<br>
 2,调用多个服务时，建议把耗时长的服务优先调用<br>
-3,建议分开业务redis与注册中心redis，避免业务操作的redis IO压力过大
+3,建议分开业务redis与注册中心redis，避免业务操作的redis IO压力过大<br>
+4,建议设定事务时间，避免事务长期保持，占据数据库资源
 
 ## 版本历史
 ### v1.0.6
