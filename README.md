@@ -260,7 +260,6 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 
 
 ## 结语
-（我前天才注册的gay佬hub...）<br>
 FAT是我学java以来第一次想与大家分享的东西<br>
 希望可以相互学习，互相交流!<br>
 thank you for your star.
