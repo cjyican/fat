@@ -68,7 +68,7 @@ public class ServiceRunningHandler {
 		} catch (Exception e) {
 			redisHelper.opsForServiceError().serviceError(param.getTxKey());
 			if(param.needToNotifyRootTxKey()) {
-				redisHelper.opsForServiceError().serviceError(param.getTxKey());
+				redisHelper.opsForServiceError().serviceError(param.getRootTxKey());
 			}
 			param.setLocalRunningException(e);
 			transactionManager.rollback(transStatus);

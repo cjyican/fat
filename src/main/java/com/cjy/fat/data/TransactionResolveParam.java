@@ -59,7 +59,7 @@ public class TransactionResolveParam {
 	 * @return
 	 */
 	public boolean needToNotifyRootTxKey() {
-		return this.txKey.equals(this.rootTxKey);
+		return !this.txKey.equals(this.rootTxKey);
 	}
 	
 	public Exception getLocalRunningException() {
