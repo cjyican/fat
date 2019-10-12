@@ -1,8 +1,8 @@
 # fat
 FAT ,基于springboot , 使用redis , spring async , spring transactionManager的强一致性分布式事务解决方案
 ## 框架介绍
-使用redis作为注册中心 ,手动管理事务的执行，spring async异步处理事务。<br>
 纯编码方式，强一致性。<br>
+使用redis作为注册中心 ,代理事务的执行，使用spring async异步处理事务线程。<br>
 基于注解使用，对业务代码可以说是零入侵，目前内置适配spring-cloud(Feign调用) ， dubbo。<br>
 同时具备一定的扩展性与兼容性，因为存在自定义的服务框架，或者以后会涌现出更多的流行服务框架，所以会提供一些组件适配自定义服务框架。
 
@@ -11,7 +11,7 @@ FAT ,基于springboot , 使用redis , spring async , spring transactionManager�
 <dependency>
     <groupId>com.github.cjyican</groupId>
     <artifactId>fat-common</artifactId>
-    <version>1.0.5-RELEASE</version>
+    <version>1.0.6-RELEASE</version>
 </dependency>
 ```
 ## 使用示例
@@ -30,7 +30,7 @@ public class FatboyEurekaRibbonApplication {
 }
 ```
 ### step1:配置注册中心
-使用redis作为注册中心，所以需要引入配置redis，暂未适配集群模式。为隔离业务使用的redis和注册中心的redis，提供了一套属性配置。
+使用redis作为注册中心，所以需要引入配置redis。为隔离业务使用的redis和注册中心的redis，提供了一套属性配置。
 在业务redis与注册中心相同时，也需要配置。
 请保证各个服务的注册中心配置一致，否则无法协调分布式事务。
 ```java
@@ -53,6 +53,9 @@ fat.redis.pool.max-idle=10
 fat.redis.pool.min-idle=2
 # 连接超时时间（毫秒）
 fat.redis.timeout=1000 
+# 集群模式,如有配置，将优先使用集群
+fat.redis.cluster.nodes=x.x.x.x:x,x.x.x.x:x
+
 ```
 应用标识，与spirng.application.name一致，必须配置
 ```java
@@ -223,9 +226,13 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 ## 建议实践
 1,调用服务，建议把服务提取到事务方法外执行，比如feign，可以提取到controller中调用，避免事务耗时过长<br>
 2,调用多个服务时，建议把耗时长的服务优先调用<br>
-3,建议分开业务redis与注册中心redis，避免业务操作的redis IO压力过大
+3,建议分开业务redis与注册中心redis，避免业务操作的redis IO压力过大<br>
+4,建议设定事务时间，避免事务长期保持，占据数据库资源
 
 ## 版本历史
+### v1.0.6
+>|-修复上个版本自定义服务api，无法获取到分布式事务上下文的bug<br>
+>|-支持注册中心集群模式，参看上文（使用示例）
 ### v1.0.5
 >|-FAT处理事务的线程池配置属性名变更（不兼容旧版本） fb.thread.xx --> fat.thread.xx<br>
 >|-添加@EnableFat注解使用，Fat分布式事务开关，ps:在dubbo场景中，因为使用的是SPI自定义Filter，在添加了fat的依赖，却不添加@EnableFat注解的话会报错。<br>
@@ -253,8 +260,6 @@ public Class DubboRemoteDataAdapter implements CustomRemoteDataAdapter{
 
 
 ## 结语
-（我前天才注册的gay佬hub...）<br>
-FAT是我第一次学java来投入如此大心血写的框架，也是我职业生涯第一个开源作品吧，不论好与坏，我都为之自豪，成就感爆棚。<br>
-迫不及待想与大家分享，如同小孩吃糖一般<br>
+FAT是我学java以来第一次想与大家分享的东西<br>
 希望可以相互学习，互相交流!<br>
 thank you for your star.
