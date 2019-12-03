@@ -19,7 +19,7 @@ public class CommitResolver {
 
 	/**
 	 * 间歇消费时间（毫秒）默认200毫秒
-	 * 争抢可提交标识的时候，可能发生错误，避免继续阻塞，导致jdbcConnection/数据库事务迟迟不肯放手，为了提高响应速度，
+	 * 争抢可提交标识的时候，可能发生错误，避免继续阻塞，导致jdbcConnection/数据库事务迟迟不肯放手，提高响应速度，
 	 * 将pop的阻塞时间分段请求
 	 */
 	@Value("${tx.commit.blankTime:200}")

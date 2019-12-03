@@ -43,6 +43,10 @@ public class TransactionResolveParam {
 	 */
 	private Exception localRunningException;
 
+	public TransactionResolveParam() {
+		
+	}
+	
 	public TransactionResolveParam(String txKey, String localTxMark, String rootTxKey,
 			long waitCommitMilliesSeconds, long waitResultMilliesSeconds) {
 		super();

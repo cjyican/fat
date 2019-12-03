@@ -39,7 +39,7 @@ public class ServiceRegisterAspect {
 	ServiceRegisterResolver serviceRegister;
 	
 	@Autowired
-	RemoteTransactionDataResolver remoteTransactionDataHelper;
+	RemoteTransactionDataResolver remoteTransactionDataResolver;
 
 	@Pointcut("@annotation(txRegisterService)")
 	public void txServiceRegister(FatServiceRegister txRegisterService) {
@@ -53,7 +53,7 @@ public class ServiceRegisterAspect {
 	//该接口需要挂起子事务组，返回子事务组操作完毕的标识给上层的父事务，当父事务开始提交时，子事务组监听，一起进行提交
 	@Before("txServiceRegister(txRegisterService)")
 	public void doBefore(JoinPoint joinPoint, FatServiceRegister txRegisterService) {
-		remoteTransactionDataHelper.init();
+		remoteTransactionDataResolver.init();
 		serviceRegister.registerService(txRegisterService);
 	}
 
