@@ -31,7 +31,7 @@ public class TransactionThreadPoolConfig {
          executor.setQueueCapacity(queueCapacity);//缓冲数量
          executor.setKeepAliveSeconds(keepAliveSeconds);//60秒内该线程未被执行自动销毁
          executor.setThreadNamePrefix("fat_resolve-");
-         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardPolicy());
+         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
          executor.initialize();
          return executor;
 	}
