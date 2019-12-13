@@ -9,19 +9,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.redis.constant.RedisKeyEnum;
 import com.cjy.fat.redis.operation.BlockMarkOperation;
-import com.cjy.fat.redis.operation.CanCommitListOperation;
 import com.cjy.fat.redis.operation.GroupCanCommitListOperation;
 import com.cjy.fat.redis.operation.GroupFinishSetOperation;
-import com.cjy.fat.redis.operation.GroupKeySetOperation;
 import com.cjy.fat.redis.operation.GroupServiceSetOperation;
-import com.cjy.fat.redis.operation.ServiceCanCommitZSetOperation;
-import com.cjy.fat.redis.operation.ServiceCancommitListOperation;
 import com.cjy.fat.redis.operation.ServiceErrorOperation;
-import com.cjy.fat.redis.operation.ServiceFinishTimeZsetOperation;
-import com.cjy.fat.redis.operation.ServiceReadyCommitListOperation;
 import com.cjy.fat.redis.operation.ServiceSetOperation;
 import com.cjy.fat.util.CollectionUtil;
 import com.cjy.fat.util.StringUtil;
@@ -36,22 +31,16 @@ public class RedisHelper {
 	
 	private static final String ERROR = "1";
 	
-	private static final String SERVICE = "-service-";
-	
 	/**
 	 * 将n个serviceId加入到所属的txKey中，后面的服务从这里获取作为服务标识
 	 * @param txKey
 	 * @param serviceId
 	 */
-	public void addToTxServiceSet(String txKey ,int serviceCount){
-		String[] array = new String[serviceCount];
-		for(int i = 0 ; i < serviceCount ; i ++){
-			array[i] = txKey + SERVICE + i;
-		}
+	public void addToTxServiceIdSet(String txKey ,String[] array){
 		redis.opsForSet().add(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_ID_SET, txKey), array);
-		this.opsForServiceSetOperation().addToServiceSet(txKey, array);
-		
 	}
+	
+//	this.opsForGroupServiceSetOperation().addToGroupServiceSet(txKey, serviceId);
 	
 	/**
 	 * 从service_id set中弹出一个元素
@@ -128,16 +117,6 @@ public class RedisHelper {
 	}
 	
 	/**
-	 * 写入阻塞队列
-	 * @param rootTxKey
-	 * @param waitMilliesSecond
-	 * @return
-	 */
-	public void pushBlockList(String txKey ,RedisKeyEnum keyEnum ,String content) {
-		redis.opsForList().leftPush(RedisHelper.initTxRedisKey(keyEnum, txKey), content);
-	}
-	
-	/**
 	 * 从阻塞队列中获取元素
 	 * @param rootTxKey
 	 * @param waitMilliesSecond
@@ -172,28 +151,6 @@ public class RedisHelper {
 		return serviceErrorOperation;
 	}
 	
-	private CanCommitListOperation canCommitListOperation;
-	
-	public CanCommitListOperation opsForCanCommitListOperation() {
-		if(null == canCommitListOperation) {
-			canCommitListOperation = new CanCommitListOperation() {
-				@Override
-				public long sizeCancommitList(String txKey){
-					return sizeList(txKey, RedisKeyEnum.SERVICE_CANCOMMIT_LIST);
-				}
-
-				@Override
-				public void pushToCancommitListFromZSet(String txKey , long size){
-					Set<String> dataSet = redis.opsForZSet().range(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_CANCOMMIT_ZSET, txKey), 0, size);
-					if(dataSet != null && dataSet.size() > 0){
-						redis.opsForList().leftPushAll(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_CANCOMMIT_LIST, txKey), dataSet);
-					}
-				}
-			};
-		}
-		return canCommitListOperation;
-	}
-	
 	private ServiceSetOperation serviceSetOperation;
 	
 	public ServiceSetOperation opsForServiceSetOperation() {
@@ -216,43 +173,6 @@ public class RedisHelper {
 		return serviceSetOperation;
 	}
 	
-	private ServiceReadyCommitListOperation serviceReadyCommitListOperation;
-	
-	public ServiceReadyCommitListOperation opsForServiceReadyCommitListOperation() {
-		if(null == serviceReadyCommitListOperation) {
-			serviceReadyCommitListOperation = new ServiceReadyCommitListOperation() {
-				@Override
-				public void pushServiceSetToReadCommitList(String txKey) {
-					pushToBlockListFromSet(txKey, RedisKeyEnum.SERVICE_SET, txKey, RedisKeyEnum.SERVICE_READYCOMMIT_LIST);
-				}
-				@Override
-				public void pushReadyCommitList(String txKey, String serviceName) {
-					redis.opsForList().leftPush(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_READYCOMMIT_LIST, txKey), serviceName);
-				}
-				@Override
-				public String popReadyCommitList(String txKey, long waitMilliesSecond) {
-					return redis.opsForList().leftPop(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_READYCOMMIT_LIST,txKey), waitMilliesSecond, TimeUnit.MILLISECONDS);
-				}
-			};
-		}
-		return serviceReadyCommitListOperation;
-	}
-	
-	private ServiceCancommitListOperation serviceCancommitListOperation;
-	
-	public ServiceCancommitListOperation opsForServiceCancommitListOperation() {
-		if(null == serviceCancommitListOperation ) {
-			serviceCancommitListOperation = new ServiceCancommitListOperation() {
-				@Override
-				public void pushServiceSetToCancommitList(String txKey) {
-					// TODO Auto-generated method stub
-					pushToBlockListFromSet(txKey, RedisKeyEnum.SERVICE_SET,txKey, RedisKeyEnum.SERVICE_CANCOMMIT_LIST);
-				}
-			};
-		}
-		return serviceCancommitListOperation;
-	}
-	
 	private GroupCanCommitListOperation groupCanCommitListOperation;
 	
 	public GroupCanCommitListOperation opsForGroupCanCommitListOperation() {
@@ -271,47 +191,6 @@ public class RedisHelper {
 		return groupCanCommitListOperation;
 	}
 	
-	private ServiceFinishTimeZsetOperation serviceFinishTimeZetOpeation;
-	
-	public ServiceFinishTimeZsetOperation opsForServiceFinishTimeZsetOperation() {
-		if(null == serviceFinishTimeZetOpeation) {
-			serviceFinishTimeZetOpeation = new ServiceFinishTimeZsetOperation() {
-				@Override
-				public void addServiceFinishZSet(String txKey, String serviceName) {
-					redis.opsForZSet().add(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_READYCOMMIT_ZSET , txKey), serviceName,
-							System.currentTimeMillis());
-				}
-				@Override
-				public long sizeServiceFinishZSet(String txKey) {
-					return redis.opsForZSet().size(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_READYCOMMIT_ZSET, txKey));
-				}
-				@Override
-				public boolean isServiceFinishZSetFull(String txKey) {
-					return sizeServiceFinishZSet(txKey) == opsForServiceSetOperation().sizeServiceSet(txKey);
-				}
-			};
-		}
-		return serviceFinishTimeZetOpeation;
-	}
-	
-	private GroupKeySetOperation groupKeySetOperation;
-	
-	public GroupKeySetOperation opsForGroupKeySetOperation() {
-		if(null == groupKeySetOperation) {
-			groupKeySetOperation = new GroupKeySetOperation() {
-				@Override
-				public void addToGroupKeySet(String rootTxKey , String localTxKey) {
-					redis.opsForSet().add(RedisHelper.initTxRedisKey(RedisKeyEnum.GROUP_KEY_SET, rootTxKey) , localTxKey);
-				}
-				@Override
-				public long sizeGroupKeySet(String rootTxKey) {
-					return redis.opsForSet().size(RedisHelper.initTxRedisKey(RedisKeyEnum.GROUP_KEY_SET, rootTxKey));
-				}
-			};
-		}
-		return groupKeySetOperation;
-	}
-	
 	private GroupFinishSetOperation groupFinishSetOperation;
 	
 	public GroupFinishSetOperation opsForGroupFinishSetOperation() {
@@ -327,33 +206,11 @@ public class RedisHelper {
 				}
 				@Override
 				public boolean isGroupFinishZSetFull(String rootTxKey) {
-					return sizeGroupFinishSet(rootTxKey) == opsForGroupKeySetOperation().sizeGroupKeySet(rootTxKey);
+					return sizeGroupFinishSet(rootTxKey) == opsForGroupServiceSetOperation().sizeGroupSeviceSet();
 				}
 			};
 		}
 		return groupFinishSetOperation;
-	}
-	
-	private ServiceCanCommitZSetOperation serviceCanCommitZSetOperation;
-	
-	public ServiceCanCommitZSetOperation opsForServiceCanCommitZSetOperation() {
-		if(null == serviceCanCommitZSetOperation) {
-			serviceCanCommitZSetOperation = new ServiceCanCommitZSetOperation() {
-				@Override
-				public void addToCancommitZSet(String txKey, String content) {
-					redis.opsForZSet().add(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_CANCOMMIT_ZSET, txKey), content , System.currentTimeMillis());
-				}
-				@Override
-				public long sizeCancommitZSet(String txKey) {
-					return redis.opsForZSet().size(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_CANCOMMIT_ZSET, txKey));
-				}
-				@Override
-				public boolean isCancommitZSetFull(String txKey) {
-					return sizeCancommitZSet(txKey) == opsForServiceSetOperation().sizeServiceSet(txKey);
-				}
-			};
-		}
-		return serviceCanCommitZSetOperation;
 	}
 	
 	private GroupServiceSetOperation groupServiceSetOperation ; 
@@ -361,14 +218,20 @@ public class RedisHelper {
 	public GroupServiceSetOperation opsForGroupServiceSetOperation() {
 		if(null == groupServiceSetOperation) {
 			groupServiceSetOperation = new GroupServiceSetOperation() {
-				@Override
-				public void addLocalServiceSetToGroupServiceSet(String localTxKey, String rootKey) {
-					pushToSetFromSet(localTxKey, RedisKeyEnum.SERVICE_SET, rootKey, RedisKeyEnum.GROUP_SERVICE_SET);
-				}
 
 				@Override
 				public void addToGroupServiceSet(String rootTxKey, String serviceId) {
 					redis.opsForSet().add(RedisHelper.initTxRedisKey(RedisKeyEnum.GROUP_SERVICE_SET, rootTxKey), serviceId);
+				}
+				
+				@Override
+				public long sizeGroupSeviceSet() {
+					return redis.opsForSet().size(RedisHelper.initTxRedisKey(RedisKeyEnum.GROUP_SERVICE_SET, TransactionContent.getRootTxKey()));
+				}
+
+				@Override
+				public void addToGroupServiceSet(String rootTxKey, String... serviceIds) {
+					redis.opsForSet().add(RedisHelper.initTxRedisKey(RedisKeyEnum.GROUP_SERVICE_SET, rootTxKey), serviceIds);
 				}
 			};
 		}

@@ -59,15 +59,9 @@ public class ServiceRegisterAspect {
 
 	@AfterThrowing(value="txServiceRegister(txRegisterService)" , throwing = "ex")
 	public void handleThrowing(JoinPoint joinPoint, FatServiceRegister txRegisterService , Exception ex ) {
-		String localTxkey = TransactionContent.getLocalTxKey();
-		String remoteTxKey = TransactionContent.getRemoteTxKey();
-		if(StringUtils.isNotBlank(localTxkey)){
-			// 写入错误标识，引发回滚本地事务/子事务组
-			redisHelper.opsForServiceError().serviceError(localTxkey);
-		}
-		if(StringUtils.isNotBlank(remoteTxKey)){
-			// 写入错误标识，引发回滚上层事务组
-			redisHelper.opsForServiceError().serviceError(remoteTxKey);
+		String rootTxKey = TransactionContent.getRootTxKey();
+		if(StringUtils.isNotBlank(rootTxKey)) {
+			redisHelper.opsForServiceError().serviceError(rootTxKey);
 		}
 		Logger.error(ex.getMessage());
 	}
@@ -87,6 +81,7 @@ public class ServiceRegisterAspect {
 				throw new FatTransactionException(localTxKey , "local transaction count is incorrect , which is more than real count" ); 
 			}
 		}
+		
 		commitResolver.clientProcced(txRegisterService, remoteTxKey, localTxKey, rootTxKey, serviceId);
 	}
 

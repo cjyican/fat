@@ -32,6 +32,7 @@ public @interface FatServiceRegister {
 	/**
 	 * 本地事务数量
 	 */
+	@Deprecated
 	int localTransactionCount() default 0; 
 	
 	/**
@@ -40,5 +41,6 @@ public @interface FatServiceRegister {
 	 * A-->B,A-->B ;A.serviceCount==2,B.serviceCount==0
 	 * A-->B,B-->C ;A.serviceCount==1,B.serviceConnt==1,C.serviceCount==0
 	 */
+	@Deprecated
 	int serviceCount() default 0;
 }

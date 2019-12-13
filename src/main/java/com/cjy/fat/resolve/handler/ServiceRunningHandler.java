@@ -56,7 +56,7 @@ public class ServiceRunningHandler {
 		TransactionStatus transStatus = transactionManager.getTransaction(transDefinition);
 		try {
 			Logger.info("{}-transaction start"  ,param.getLocalTxMark());
-			redisHelper.opsForServiceError().isServiceError(param.getTxKey());
+			redisHelper.opsForServiceError().isServiceError(param.getRootTxKey());
 			Object result = joinPoint.proceed();
 			// 写入执行结果返回主线程 ,改用本地阻塞式队列
 			param.offerToLocalResultQueue(result);
@@ -66,10 +66,11 @@ public class ServiceRunningHandler {
 			transactionManager.commit(transStatus);
 			Logger.info("{}-transaction commit" , param.getLocalTxMark());
 		} catch (Exception e) {
-			redisHelper.opsForServiceError().serviceError(param.getTxKey());
-			if(param.needToNotifyRootTxKey()) {
-				redisHelper.opsForServiceError().serviceError(param.getRootTxKey());
-			}
+//			redisHelper.opsForServiceError().serviceError(param.getTxKey());
+			redisHelper.opsForServiceError().serviceError(param.getRootTxKey());
+//			if(param.needToNotifyRootTxKey()) {
+//				redisHelper.opsForServiceError().serviceError(param.getRootTxKey());
+//			}
 			param.setLocalRunningException(e);
 			transactionManager.rollback(transStatus);
 			Logger.error("{}-transaction rollback ,error:{}", param.getLocalTxMark() , e.getMessage());

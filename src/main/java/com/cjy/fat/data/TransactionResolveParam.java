@@ -15,6 +15,7 @@ public class TransactionResolveParam {
 	/**
 	 * 当前事务的txKey
 	 */
+	@Deprecated
 	private String txKey;
 	/**
 	 * 本地事务标识
@@ -90,9 +91,11 @@ public class TransactionResolveParam {
 		this.waitCommitMilliesSeconds = waitCommitMilliesSeconds;
 	}
 	
+	@Deprecated
 	public String getTxKey() {
 		return txKey;
 	}
+	
 	public void setTxKey(String txKey) {
 		this.txKey = txKey;
 	}

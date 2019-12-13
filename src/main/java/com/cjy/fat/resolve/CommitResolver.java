@@ -34,51 +34,22 @@ public class CommitResolver {
 	 * @param param
 	 */
 	public void blockProceed(TransactionResolveParam param) {
-		// 记录业务完成 ， 开始尝试提交事务时间戳，事务提交需要反向提交，越迟尝试提交的越早提交
-		redisHelper.opsForServiceFinishTimeZsetOperation().addServiceFinishZSet(param.getTxKey(), param.getLocalTxMark());
-		// 判断是否所有服务都已经完成业务, 改用redis阻塞等待机制 , (使用线程变量)
-		if (redisHelper.opsForServiceFinishTimeZsetOperation().isServiceFinishZSetFull(param.getTxKey())) {
-//			// 将serviceSet的元素加入到readCommitList中
-			this.passServiceReadyCommitList(param.getTxKey());
-		}
-		// 争抢预备提交位(此时其他服务增在执行业务，最后完成业务的将会存入往预备提交队列存入serviceZet)
-		// 这个更多的意义在于让各事务的起步时间同步，降低时间差导致的提交不一致情况
-		this.popServiceReadyCommitList(param.getTxKey(),  param.getLocalTxMark(),  param.getWaitCommitMilliesSeconds());
-		redisHelper.opsForGroupFinishSetOperation().addGroupFinishSet(param.getRootTxKey(), param.getTxKey());
+		
+		redisHelper.opsForGroupFinishSetOperation().addGroupFinishSet(param.getRootTxKey(), param.getLocalTxMark());
+		
 		// 当事务分组协调器维护的txkey数量等于完成数量的时候 ， 告诉各localTxKey可以提交
 		if(redisHelper.opsForGroupFinishSetOperation().isGroupFinishZSetFull(param.getRootTxKey())) {	
 			this.passGroupCancommitList(param.getRootTxKey());
 		}
+		
 		// 争抢分组管理器提交位
-		this.popGroupCanCommitList(param.getRootTxKey(), param.getTxKey(),  Integer.MAX_VALUE);
-	}
-	
-	public void passServiceReadyCommitList(String txKey) {
-		// 将serviceSet的元素加入到readCommitList中
-		redisHelper.opsForServiceReadyCommitListOperation().pushServiceSetToReadCommitList(txKey);
-		// 写入passed，后续block操作直接读标志位
-		redisHelper.opsForBlockMarkOperation().passBlockMark(txKey, RedisKeyEnum.SERVICE_READYCOMMIT_MARK);
-	}
-	
-	public void passServiceCancommitList(String txKey) {
-		// 将serviceSet的元素加入到CancommitList中
-		redisHelper.opsForServiceCancommitListOperation().pushServiceSetToCancommitList(txKey);
-		// 写入passed，后续block操作直接读标志位
-		redisHelper.opsForBlockMarkOperation().passBlockMark(txKey, RedisKeyEnum.SERVICE_CANCOMMIT_MARK);
+		this.popGroupCanCommitList(param.getRootTxKey(), param.getLocalTxMark(),  Integer.MAX_VALUE);
 	}
 	
 	public void passGroupCancommitList(String rootTxKey) {
 		redisHelper.opsForGroupCanCommitListOperation().pushGroupServiceSetToGroupCommitList(rootTxKey);
 		// 写入passed，后续block操作直接读标志位
 		redisHelper.opsForBlockMarkOperation().passBlockMark(rootTxKey, RedisKeyEnum.GROUP_CANCOMMIT_MARK);
-	}
-	
-	public boolean popServiceReadyCommitList(String txKey , String content , long waitMilliesSeconds) {
-		return popCommitListWithBlankTime(RedisKeyEnum.SERVICE_READYCOMMIT_LIST, RedisKeyEnum.SERVICE_READYCOMMIT_MARK, txKey, content, waitMilliesSeconds);
-	}
-	
-	public boolean popServiceCanCommitList(String txKey , String content , long waitMilliesSeconds) {
-		return popCommitListWithBlankTime(RedisKeyEnum.SERVICE_CANCOMMIT_LIST, RedisKeyEnum.SERVICE_CANCOMMIT_MARK, txKey, content, waitMilliesSeconds);
 	}
 	
 	public boolean popGroupCanCommitList(String rootTxKey , String content , long waitMilliesSeconds) {
@@ -122,26 +93,17 @@ public class CommitResolver {
 	 * @param param
 	 */
 	public void clientProcced(FatServiceRegister txRegisterService, String remoteTxKey , String localTxKey ,String rootTxKey , String serviceId ){
-		//先通知上层事务组
-		if(StringUtils.isNotBlank(remoteTxKey)){
-			this.clientCommonProcced(remoteTxKey, rootTxKey, serviceId);
-		}
-		
-		//父事务组开始进行事务提交的时候，本事务组也开始进行提交
-		if(StringUtils.isNotBlank(localTxKey)){
-			this.clientCommonProcced(localTxKey, rootTxKey, serviceId);
+		if(StringUtils.isNotBlank(rootTxKey)){
+			this.clientCommonProcced(serviceId, rootTxKey, serviceId);
 		}
 	}
 	
 	private void clientCommonProcced(String txKey , String rootTxKey , String serviceId) {
-		redisHelper.opsForServiceError().isServiceError(txKey);
-		// 当前事务组完成时间 , 因为存在本地事务与服务调服务的时候，该协调交给发起者处理，不在ServieRunningHandler处理了
-		redisHelper.opsForServiceFinishTimeZsetOperation().addServiceFinishZSet(txKey, serviceId);
-		// 判断是否所有服务都已经完成业务, 改用redis阻塞等待机制
-		if(redisHelper.opsForServiceFinishTimeZsetOperation().isServiceFinishZSetFull(txKey)) {
-			// 将serviceSet的元素加入到readCommitList中
-			this.passServiceReadyCommitList(txKey);
-			redisHelper.opsForGroupFinishSetOperation().addGroupFinishSet(rootTxKey, txKey);
+		redisHelper.opsForServiceError().isServiceError(rootTxKey);
+		redisHelper.opsForGroupFinishSetOperation().addGroupFinishSet(rootTxKey, serviceId);
+		// 当事务分组协调器维护的txkey数量等于完成数量的时候 ， 告诉各localTxKey可以提交
+		if(redisHelper.opsForGroupFinishSetOperation().isGroupFinishZSetFull(rootTxKey)) {	
+			this.passGroupCancommitList(rootTxKey);
 		}
 	}
 	
@@ -166,14 +128,14 @@ public class CommitResolver {
 		}
 		//等待超时，查看是否可以阻止事务提交
 		if(null == serviceResult) {
-			boolean isPassed = redisHelper.opsForBlockMarkOperation().isBlockMarkPassed(param.getTxKey(), RedisKeyEnum.SERVICE_READYCOMMIT_MARK);
+			boolean isPassed = redisHelper.opsForBlockMarkOperation().isBlockMarkPassed(param.getRootTxKey(), RedisKeyEnum.SERVICE_READYCOMMIT_MARK);
 			if(!isPassed) {
-				throw new FatTransactionException(param.getTxKey(), "wait result time out , transaction roll back ");
+				throw new FatTransactionException(param.getRootTxKey(), "wait result time out , transaction roll back ");
 			}
 			//不能阻止事务提交，进入等待
-			for(;;) {
+			while(true) {
 				//检查是否事务出错
-				redisHelper.opsForServiceError().isServiceError(param.getTxKey());
+				redisHelper.opsForServiceError().isServiceError(param.getRootTxKey());
 				serviceResult = param.pollFromLocalResultQueue(waitResultBlankTime);
 				if(null != serviceResult) {
 					break;
