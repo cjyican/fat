@@ -6,16 +6,6 @@ import java.util.Queue;
 public class TransactionThreadLocal {
 	
 	/**
-	 * 所属的远程分布式事务key
-	 */
-	private String remoteTxKey ;
-	
-	/**
-	 * 所属的本地事务key
-	 */
-	private String localTxKey ;
-	
-	/**
 	 * 根txKey
 	 */
 	private String rootTxKey;
@@ -29,22 +19,6 @@ public class TransactionThreadLocal {
 	 * 本地事务标识
 	 */
 	private Queue<String> localTxQueue = new ArrayDeque<>();
-
-	public String getRemoteTxKey() {
-		return remoteTxKey;
-	}
-
-	public void setRemoteTxKey(String remoteTxKey) {
-		this.remoteTxKey = remoteTxKey;
-	}
-
-	public String getLocalTxKey() {
-		return localTxKey;
-	}
-
-	public void setLocalTxKey(String localTxKey) {
-		this.localTxKey = localTxKey;
-	}
 
 	public String getRootTxKey() {
 		return rootTxKey;

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import com.cjy.fat.annotation.FatServiceRegister;
 import com.cjy.fat.data.TransactionContent;
-import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.redis.RedisHelper;
 
 @Aspect
@@ -70,19 +69,10 @@ public class ServiceRegisterAspect {
 	@AfterReturning(value = "txServiceRegister(txRegisterService)", returning = "sourceResult")
 	public void doAfterReturn(JoinPoint joinPoint, Object sourceResult, FatServiceRegister txRegisterService)
 			throws Exception {
-		String localTxKey = TransactionContent.getLocalTxKey();
-		String remoteTxKey = TransactionContent.getRemoteTxKey();
 		String rootTxKey = TransactionContent.getRootTxKey();
 		String serviceId = TransactionContent.getServiceId();
 
-		// 当存在远程事务 ， 本地事务时需要明确指定本地事务数量 , 若此时本地事务组依然存在元素，说明数量过多
-		if(txRegisterService.localTransactionCount() > 0){
-			if(TransactionContent.localTxQueueSize() > 0){
-				throw new FatTransactionException(localTxKey , "local transaction count is incorrect , which is more than real count" ); 
-			}
-		}
-		
-		commitResolver.clientProcced(txRegisterService, remoteTxKey, localTxKey, rootTxKey, serviceId);
+		commitResolver.clientProcced(rootTxKey, serviceId);
 	}
 
 }

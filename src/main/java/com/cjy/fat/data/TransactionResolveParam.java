@@ -13,11 +13,6 @@ import java.util.concurrent.TimeUnit;
 public class TransactionResolveParam {
 
 	/**
-	 * 当前事务的txKey
-	 */
-	@Deprecated
-	private String txKey;
-	/**
 	 * 本地事务标识
 	 */
 	private String localTxMark;
@@ -48,23 +43,14 @@ public class TransactionResolveParam {
 		
 	}
 	
-	public TransactionResolveParam(String txKey, String localTxMark, String rootTxKey,
+	public TransactionResolveParam( String localTxMark, String rootTxKey,
 			long waitCommitMilliesSeconds, long waitResultMilliesSeconds) {
 		super();
-		this.txKey = txKey;
 		this.localTxMark = localTxMark;
 		this.rootTxKey = rootTxKey;
 		this.waitCommitMilliesSeconds = waitCommitMilliesSeconds;
 		this.waitResultMilliesSeconds = waitResultMilliesSeconds;
 		localResultQueue = new ArrayBlockingQueue<>(1);
-	}
-	
-	/**
-	 * 出错时，判断是否需要通知rootTxKey
-	 * @return
-	 */
-	public boolean needToNotifyRootTxKey() {
-		return !this.txKey.equals(this.rootTxKey);
 	}
 	
 	public Exception getLocalRunningException() {
@@ -91,14 +77,6 @@ public class TransactionResolveParam {
 		this.waitCommitMilliesSeconds = waitCommitMilliesSeconds;
 	}
 	
-	@Deprecated
-	public String getTxKey() {
-		return txKey;
-	}
-	
-	public void setTxKey(String txKey) {
-		this.txKey = txKey;
-	}
 	public String getLocalTxMark() {
 		return localTxMark;
 	}

@@ -6,7 +6,6 @@ public interface GroupServiceSetOperation {
 	
 	void addToGroupServiceSet(String rootTxKey , String ... serviceIds);
 
-
 	long sizeGroupSeviceSet();
 	
 }

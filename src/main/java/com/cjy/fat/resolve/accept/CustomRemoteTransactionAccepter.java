@@ -38,19 +38,13 @@ public class CustomRemoteTransactionAccepter implements RemoteTransactionAccepte
 				CustomRemoteDataAdapter adapter = (CustomRemoteDataAdapter)context.getBean(adapters[i]);
 				// 远程数据容器
 				Map<String , String> remoteDataMap = adapter.convertRemoteDataToMap();
-				 //获取remoteTxKey
-				String remoteTxKey = remoteDataMap.get(TransactionContent.STR_REMOTE_TX_KEY);
-				if(StringUtils.isNotBlank(remoteTxKey)){
-					//加入本地线程remoteTxkey变量
-					TransactionContent.setRemoteTxKey(remoteTxKey);
-				}
 				// 获取rootTxKey
 				String rootTxKey = remoteDataMap.get(TransactionContent.STR_ROOT_TX_KEY);
 				if(StringUtils.isNotBlank(rootTxKey)){
 					TransactionContent.setRootTxKey(rootTxKey);
 				}
 				// 获取serviceId
-				String serviceId = redisHelper.popFromServiceIdSet(remoteTxKey);
+				String serviceId = redisHelper.popFromServiceIdSet(rootTxKey);
 				if(StringUtils.isBlank(serviceId)){
 					serviceId = serviceName;
 				}

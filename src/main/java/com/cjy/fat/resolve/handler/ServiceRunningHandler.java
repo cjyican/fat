@@ -66,11 +66,7 @@ public class ServiceRunningHandler {
 			transactionManager.commit(transStatus);
 			Logger.info("{}-transaction commit" , param.getLocalTxMark());
 		} catch (Exception e) {
-//			redisHelper.opsForServiceError().serviceError(param.getTxKey());
 			redisHelper.opsForServiceError().serviceError(param.getRootTxKey());
-//			if(param.needToNotifyRootTxKey()) {
-//				redisHelper.opsForServiceError().serviceError(param.getRootTxKey());
-//			}
 			param.setLocalRunningException(e);
 			transactionManager.rollback(transStatus);
 			Logger.error("{}-transaction rollback ,error:{}", param.getLocalTxMark() , e.getMessage());
@@ -85,12 +81,8 @@ public class ServiceRunningHandler {
 		if(null != txData) {
 			TransactionContent.initContainer();
 			String rootTxKey = txData.get(TransactionContent.STR_ROOT_TX_KEY);
-			String localTxKey = txData.get(TransactionContent.STR_REMOTE_TX_KEY);
 			if(StringUtils.isNotBlank(rootTxKey)) {
 				TransactionContent.setRootTxKey(rootTxKey);
-			}
-			if(StringUtils.isNotBlank(localTxKey)) {
-				TransactionContent.setLocalTxKey(localTxKey);
 			}
 		}
 	}

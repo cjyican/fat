@@ -40,8 +40,6 @@ public class RedisHelper {
 		redis.opsForSet().add(RedisHelper.initTxRedisKey(RedisKeyEnum.SERVICE_ID_SET, txKey), array);
 	}
 	
-//	this.opsForGroupServiceSetOperation().addToGroupServiceSet(txKey, serviceId);
-	
 	/**
 	 * 从service_id set中弹出一个元素
 	 * @return

@@ -17,9 +17,6 @@ public class FatDubboFilter implements Filter{
 	
 	@Override
 	public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-		if (StringUtils.isNotBlank(TransactionContent.getLocalTxKey())) {
-			RpcContext.getContext().setAttachment(TransactionContent.STR_REMOTE_TX_KEY, TransactionContent.getLocalTxKey());
-		}
 		if (StringUtils.isNotBlank(TransactionContent.getRootTxKey())) {
 			RpcContext.getContext().setAttachment(TransactionContent.STR_ROOT_TX_KEY, TransactionContent.getRootTxKey());
 		}

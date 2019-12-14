@@ -20,9 +20,6 @@ public class FatSpringCloudInterceptor implements RequestInterceptor {
 	 */
 	@Override
 	public void apply(RequestTemplate template) {
-		if (StringUtils.isNotBlank(TransactionContent.getLocalTxKey())) {
-			template.header(TransactionContent.STR_REMOTE_TX_KEY, TransactionContent.getLocalTxKey());
-		}
 		//设置rootTxKey传递给下方的服务
 		if (StringUtils.isNotBlank(TransactionContent.getRootTxKey())) {
 			template.header(TransactionContent.STR_ROOT_TX_KEY, TransactionContent.getRootTxKey());
