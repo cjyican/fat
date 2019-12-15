@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
 import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.redis.RedisHelper;
@@ -83,11 +82,11 @@ public class CommitResolver {
 		throw new FatTransactionException(txKey, txKey+" local transaction is finished, wait for commit timeout");
 	}
 	
-	private long getTryTimes(long waitMilliesSeconds , long blankTime) {
-		long popTimes = waitMilliesSeconds / blankTime;
-		popTimes = waitMilliesSeconds % blankTime > 0 ? popTimes + 1 : popTimes;
-		return popTimes;
-	}
+//	private long getTryTimes(long waitMilliesSeconds , long blankTime) {
+//		long popTimes = waitMilliesSeconds / blankTime;
+//		popTimes = waitMilliesSeconds % blankTime > 0 ? popTimes + 1 : popTimes;
+//		return popTimes;
+//	}
 	
 	/**
 	 * 客户端提交过程

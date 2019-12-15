@@ -5,11 +5,6 @@ import java.util.Map;
 
 public class TransactionContent {
 	
-//	/**
-//	 * 所属的远程分布式事务key
-//	 */
-//	public static final String STR_REMOTE_TX_KEY = "remoteTxKey";
-	
 	/**
 	 * 根txKey
 	 */
@@ -24,42 +19,9 @@ public class TransactionContent {
 	public static final Map<String , String> buildRemoteData(){
 		//返回新的对象，不开放修改入口，避免被客户端串改
 		Map<String , String> map = new HashMap<>();
-//		map.put(STR_REMOTE_TX_KEY, getLocalTxKey());
 		map.put(STR_ROOT_TX_KEY, getRootTxKey());
 		return map;
 	}
-	
-//	/**
-//	 * 设置远程分布式key
-//	 * @param txKey
-//	 * @return
-//	 */
-//	public static void setRemoteTxKey(String remoteTxKey) {
-//		container.get().setRemoteTxKey(remoteTxKey);
-//	}
-//	
-//	/**
-//	 * 获取远程分布式key
-//	 */
-//	public static String getRemoteTxKey() {
-//		return container.get().getRemoteTxKey();
-//	}
-	
-//	/**
-//	 * 设置本地分布式key
-//	 * @param txKey
-//	 * @return
-//	 */
-//	public static void setLocalTxKey(String localTxKey) {
-//		container.get().setLocalTxKey(localTxKey);
-//	}
-//	
-//	/**
-//	 * 获取本地分布式key
-//	 */
-//	public static String getLocalTxKey() {
-//		return  container.get().getLocalTxKey();
-//	}
 	
 	public static void setRootTxKey(String rootTxKey) {
 		container.get().setRootTxKey(rootTxKey);
@@ -69,26 +31,26 @@ public class TransactionContent {
 		return container.get().getRootTxKey();
 	}
 	
-	/**
-	 * 本地事务组加入元素
-	 */
-	public static void pushLocalTxQueue(String localTxMark){
-		container.get().getLocalTxQueue().add(localTxMark);
-	}
-	
-	/**
-	 * 本地事务组取出元素
-	 */
-	public static String pollLocalTxQueue(){
-		return container.get().getLocalTxQueue().poll();
-	}
-	
-	/**
-	 * 本地事务组数量
-	 */
-	public static int localTxQueueSize(){
-		return container.get().getLocalTxQueue().size();
-	}
+//	/**
+//	 * 本地事务组加入元素
+//	 */
+//	public static void pushLocalTxQueue(String localTxMark){
+//		container.get().getLocalTxQueue().add(localTxMark);
+//	}
+//	
+//	/**
+//	 * 本地事务组取出元素
+//	 */
+//	public static String pollLocalTxQueue(){
+//		return container.get().getLocalTxQueue().poll();
+//	}
+//	
+//	/**
+//	 * 本地事务组数量
+//	 */
+//	public static int localTxQueueSize(){
+//		return container.get().getLocalTxQueue().size();
+//	}
 	
 	/**
 	 * 获取服务标识

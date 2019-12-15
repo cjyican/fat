@@ -16,31 +16,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface FatServiceRegister {
 	
-	/**
-	 * 需要进入加入事务的service
-	 * @return
-	 */
-	@Deprecated
-	Class<?>[] value() default {};
-	
-	/**
-	 * 业务线处理完成时间总等待时长 , 默认5秒
-	 */
-	@Deprecated
-	long waitFinishMilliesSeconds() default 5000;
-	
-	/**
-	 * 本地事务数量
-	 */
-	@Deprecated
-	int localTransactionCount() default 0; 
-	
-	/**
-	 * 服务数量
-	 * A-->B,A-->C ;A.serviceCount==2,B/C.serviceCount==0
-	 * A-->B,A-->B ;A.serviceCount==2,B.serviceCount==0
-	 * A-->B,B-->C ;A.serviceCount==1,B.serviceConnt==1,C.serviceCount==0
-	 */
-	@Deprecated
-	int serviceCount() default 0;
+	boolean isOpenFattransaction() default true;
 }

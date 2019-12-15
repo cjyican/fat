@@ -17,14 +17,6 @@ import java.lang.annotation.Target;
 public @interface FatTransaction {
 	
 	/**
-	 * 是否等待当前服务的返回值 ,默认等待。
-	 * 设置为不等待可以提高一定的性能，但是必须要保证该方法的返回值具有默认的构造器。
-	 * @return
-	 */
-	@Deprecated
-	boolean waitResult() default true;
-	
-	/**
 	 * 等待当前服务返回值的超时时间 , 默认3秒
 	 */
 	long waitResultMillisSeconds() default 3000;

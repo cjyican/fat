@@ -4,6 +4,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import com.cjy.fat.annotation.FatTransaction;
+
 /**
  * 事务协调的参数
  * 
@@ -32,25 +34,24 @@ public class TransactionResolveParam {
 	 * 业务方法返回值监听队列
 	 * @return
 	 */
-	private BlockingQueue<Object> localResultQueue ;
+	private BlockingQueue<Object> localResultQueue = new ArrayBlockingQueue<>(1);
 	
 	/**
 	 * 在执行业务方法时抛出的异常，在主线程中不再使用redis接收
 	 */
 	private Exception localRunningException;
 
-	public TransactionResolveParam() {
+	private TransactionResolveParam() {
 		
 	}
 	
-	public TransactionResolveParam( String localTxMark, String rootTxKey,
-			long waitCommitMilliesSeconds, long waitResultMilliesSeconds) {
-		super();
-		this.localTxMark = localTxMark;
-		this.rootTxKey = rootTxKey;
-		this.waitCommitMilliesSeconds = waitCommitMilliesSeconds;
-		this.waitResultMilliesSeconds = waitResultMilliesSeconds;
-		localResultQueue = new ArrayBlockingQueue<>(1);
+	public static TransactionResolveParam buildTxParam(FatTransaction fatTransaction , String localTxName) {
+		TransactionResolveParam bean = new TransactionResolveParam();
+		bean.rootTxKey = TransactionContent.getRootTxKey();
+		bean.localTxMark = localTxName;
+		bean.waitCommitMilliesSeconds = fatTransaction.waitCommitMillisSeconds();
+		bean.waitResultMilliesSeconds = fatTransaction.waitResultMillisSeconds();
+		return bean;
 	}
 	
 	public Exception getLocalRunningException() {

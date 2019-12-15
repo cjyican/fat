@@ -38,37 +38,33 @@ public class TransactionAspect {
 	@Autowired
 	CommitResolver commitResolver;
 
-	@Pointcut("@annotation(txService)")
-	public void txService(FatTransaction txService) {
+	@Pointcut("@annotation(fatTransaction)")
+	public void fatTransaction(FatTransaction fatTransaction) {
 
 	}
 
-	@Around("txService(txService)")
-	public Object doAround(JoinPoint joinPoint, FatTransaction txService) throws Throwable {
+	@Around("fatTransaction(fatTransaction)")
+	public Object doAround(JoinPoint joinPoint, FatTransaction fatTransaction) throws Throwable {
 		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 		ProceedingJoinPoint proceedingJoinPoint = (ProceedingJoinPoint) joinPoint;
 		
-		//获取TxKey , 当该接口具有本地事务时使用LocalKey , 当localKey不存在，说明不需要使用本地事务 ， 使用remoteKey
-		String rootTxKey = TransactionContent.getRootTxKey();
-		//当txKey不存在时，没有远程穿过的，也没有本地生成的，说明客户端没有开启分布式事务 , 直接运行
-		if(StringUtils.isBlank(rootTxKey)){
+		if(StringUtils.isBlank(TransactionContent.getRootTxKey())){
 			return proceedingJoinPoint.proceed();
 		}
-		//获取本地事务标识
-		String localTxMark =  TransactionContent.pollLocalTxQueue();
+		
 		Method serviceMethod = signature.getMethod();
 		Transactional transactionalAnno = serviceMethod.getAnnotation(Transactional.class);
 		if(null == transactionalAnno) {
 			throw new FatTransactionException("the method " + serviceMethod.getName() + " is not decorated by @Transactional");
 		}
-		TransactionResolveParam param = new TransactionResolveParam(
-				localTxMark, 
-				rootTxKey, 
-				txService.waitCommitMillisSeconds(), 
-				txService.waitResultMillisSeconds());
+		
+		String localTxMark = TransactionContent.getServiceId() + "-" + serviceMethod.getName();
+		TransactionResolveParam txParam = TransactionResolveParam.buildTxParam(fatTransaction , localTxMark);
+		redisHelper.opsForGroupServiceSetOperation().addToGroupServiceSet(TransactionContent.getRootTxKey(), localTxMark);
+		
 		// 异步执行业务操作
-		serviceHandler.proceed(proceedingJoinPoint , transactionalAnno, param ,TransactionContent.buildRemoteData());
-		return commitResolver.waitServiceResult(param);
+		serviceHandler.proceed(proceedingJoinPoint , transactionalAnno, txParam ,TransactionContent.buildRemoteData());
+		return commitResolver.waitServiceResult(txParam);
 	}
 	
 	

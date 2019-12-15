@@ -1,8 +1,5 @@
 package com.cjy.fat.data;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
-
 public class TransactionThreadLocal {
 	
 	/**
@@ -15,10 +12,10 @@ public class TransactionThreadLocal {
 	 */
 	private String serviceId ;
 
-	/**
-	 * 本地事务标识
-	 */
-	private Queue<String> localTxQueue = new ArrayDeque<>();
+//	/**
+//	 * 本地事务标识
+//	 */
+//	private Queue<String> localTxQueue = new ArrayDeque<>();
 
 	public String getRootTxKey() {
 		return rootTxKey;
@@ -36,12 +33,12 @@ public class TransactionThreadLocal {
 		this.serviceId = serviceId;
 	}
 
-	public Queue<String> getLocalTxQueue() {
-		return localTxQueue;
-	}
-
-	public void setLocalTxQueue(Queue<String> localTxQueue) {
-		this.localTxQueue = localTxQueue;
-	}
+//	public Queue<String> getLocalTxQueue() {
+//		return localTxQueue;
+//	}
+//
+//	public void setLocalTxQueue(Queue<String> localTxQueue) {
+//		this.localTxQueue = localTxQueue;
+//	}
 	
 }
