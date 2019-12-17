@@ -3,7 +3,6 @@ package com.cjy.fat.exception;
 public class FatTransactionException extends RuntimeException{
 
 	private static final long serialVersionUID = 6753994776962949879L;
-	
 
 	private String txKey ; 
 	

@@ -60,10 +60,10 @@ public class TransactionAspect {
 		
 		String localTxMark = TransactionContent.getServiceId() + "-" + serviceMethod.getName();
 		TransactionResolveParam txParam = TransactionResolveParam.buildTxParam(fatTransaction , localTxMark);
-		redisHelper.opsForGroupServiceSetOperation().addToGroupServiceSet(TransactionContent.getRootTxKey(), localTxMark);
+		redisHelper.opsForGroupServiceSetOperation().addToGroupServiceSet(localTxMark);
 		
 		// 异步执行业务操作
-		serviceHandler.proceed(proceedingJoinPoint , transactionalAnno, txParam ,TransactionContent.buildRemoteData());
+		serviceHandler.proceed(proceedingJoinPoint , transactionalAnno, txParam ,TransactionContent.getRootTxKey());
 		return commitResolver.waitServiceResult(txParam);
 	}
 	

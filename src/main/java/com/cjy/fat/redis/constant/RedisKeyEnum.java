@@ -15,19 +15,9 @@ public enum RedisKeyEnum {
 	FAT_KEY_ID("fat_id"),
 	
 	/**
-	 * 服务标识,SET
-	 */
-	SERVICE_ID_SET(":service_id:"),
-	
-	/**
 	 * 是否有服务/事务出错 {@link RedisHelper }
 	 */
 	IS_SERVICE_ERROR(":service_error:"),
-	
-	/**
-	 * 加入的服务/事务列表 ， left push
-	 */
-	SERVICE_SET(":service_set:"),
 	
 	/**
 	 * 事务分组协调器完成的列表，set

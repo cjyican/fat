@@ -12,11 +12,6 @@ public class TransactionThreadLocal {
 	 */
 	private String serviceId ;
 
-//	/**
-//	 * 本地事务标识
-//	 */
-//	private Queue<String> localTxQueue = new ArrayDeque<>();
-
 	public String getRootTxKey() {
 		return rootTxKey;
 	}
@@ -32,13 +27,5 @@ public class TransactionThreadLocal {
 	public void setServiceId(String serviceId) {
 		this.serviceId = serviceId;
 	}
-
-//	public Queue<String> getLocalTxQueue() {
-//		return localTxQueue;
-//	}
-//
-//	public void setLocalTxQueue(Queue<String> localTxQueue) {
-//		this.localTxQueue = localTxQueue;
-//	}
 	
 }

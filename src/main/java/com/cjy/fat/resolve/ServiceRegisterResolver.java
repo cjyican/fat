@@ -15,7 +15,7 @@ public class ServiceRegisterResolver {
 	RedisHelper redisHelper;
 	
 	public void registerService(FatServiceRegister txRegisterService ){
-		if(!txRegisterService.isOpenFattransaction()) {
+		if(!txRegisterService.openTransaction()) {
 			return;
 		}
 		if (StringUtils.isEmpty(TransactionContent.getRootTxKey())) {
@@ -23,12 +23,12 @@ public class ServiceRegisterResolver {
 			TransactionContent.setRootTxKey(rootTxKey);
 			
 			// 初始化事务组回滚标识
-			redisHelper.opsForServiceError().serviceNomal(rootTxKey);
+			redisHelper.opsForServiceError().serviceNomal();
 			
 		}
 		
 		// 将自己加入事务组
-		redisHelper.opsForGroupServiceSetOperation().addToGroupServiceSet(TransactionContent.getRootTxKey(), TransactionContent.getServiceId());
+		redisHelper.opsForGroupServiceSetOperation().addToGroupServiceSet(TransactionContent.getServiceId());
 		
 	}
 	

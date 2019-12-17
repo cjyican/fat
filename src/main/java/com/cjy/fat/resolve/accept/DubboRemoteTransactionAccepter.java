@@ -31,17 +31,14 @@ public class DubboRemoteTransactionAccepter implements RemoteTransactionAccepter
 		}
 		
         Map<String, String> attachments = context.getAttachments();
+        
   		// 获取rootTxKey
   		String rootTxKey = attachments.get(TransactionContent.STR_ROOT_TX_KEY);
   		if(StringUtils.isNotBlank(rootTxKey)){
   			TransactionContent.setRootTxKey(rootTxKey);
   		}
-  		// 获取serviceId
-  		String serviceId = redisHelper.popFromServiceIdSet(rootTxKey);
-  		if(StringUtils.isBlank(serviceId)){
-  			serviceId = serviceName;
-  		}
-  		TransactionContent.setServiceId(serviceId);
+  		
+  		TransactionContent.setServiceId(serviceName);
 	}
 
 }

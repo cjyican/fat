@@ -36,6 +36,7 @@ public class CustomRemoteTransactionAccepter implements RemoteTransactionAccepte
 		if(adapters != null&& adapters.length > 0) {
 			for(int i = 0 ; i < adapters.length ;i ++ ) {
 				CustomRemoteDataAdapter adapter = (CustomRemoteDataAdapter)context.getBean(adapters[i]);
+				
 				// 远程数据容器
 				Map<String , String> remoteDataMap = adapter.convertRemoteDataToMap();
 				// 获取rootTxKey
@@ -43,12 +44,8 @@ public class CustomRemoteTransactionAccepter implements RemoteTransactionAccepte
 				if(StringUtils.isNotBlank(rootTxKey)){
 					TransactionContent.setRootTxKey(rootTxKey);
 				}
-				// 获取serviceId
-				String serviceId = redisHelper.popFromServiceIdSet(rootTxKey);
-				if(StringUtils.isBlank(serviceId)){
-					serviceId = serviceName;
-				}
-				TransactionContent.setServiceId(serviceId);
+				
+				TransactionContent.setServiceId(serviceName);
 			}
 		}
 	}

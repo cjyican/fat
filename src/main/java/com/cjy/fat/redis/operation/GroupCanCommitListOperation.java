@@ -5,7 +5,7 @@ public interface GroupCanCommitListOperation {
 	/**
 	 * 将groupServiceSet的元素放入到groupCancommit
 	 */
-	public void pushGroupServiceSetToGroupCommitList(String txKey);
+	public void pushGroupServiceSetToGroupCommitList();
 	
 	/**
 	 * 获取事务分组协调器可提交标识
@@ -13,7 +13,7 @@ public interface GroupCanCommitListOperation {
 	 * @param waitMilliesSecond
 	 * @return
 	 */
-	public String popGroupCancommit(String rootTxKey , long waitMilliesSecond) ;
+	public String popGroupCancommit( long waitMilliesSecond) ;
 	
 	
 }

@@ -17,7 +17,6 @@ public class TransactionContent {
 	 * @return
 	 */
 	public static final Map<String , String> buildRemoteData(){
-		//返回新的对象，不开放修改入口，避免被客户端串改
 		Map<String , String> map = new HashMap<>();
 		map.put(STR_ROOT_TX_KEY, getRootTxKey());
 		return map;
@@ -30,27 +29,6 @@ public class TransactionContent {
 	public static String getRootTxKey() {
 		return container.get().getRootTxKey();
 	}
-	
-//	/**
-//	 * 本地事务组加入元素
-//	 */
-//	public static void pushLocalTxQueue(String localTxMark){
-//		container.get().getLocalTxQueue().add(localTxMark);
-//	}
-//	
-//	/**
-//	 * 本地事务组取出元素
-//	 */
-//	public static String pollLocalTxQueue(){
-//		return container.get().getLocalTxQueue().poll();
-//	}
-//	
-//	/**
-//	 * 本地事务组数量
-//	 */
-//	public static int localTxQueueSize(){
-//		return container.get().getLocalTxQueue().size();
-//	}
 	
 	/**
 	 * 获取服务标识

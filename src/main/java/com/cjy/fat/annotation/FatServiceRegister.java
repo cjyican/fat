@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface FatServiceRegister {
 	
-	boolean isOpenFattransaction() default true;
+	boolean openTransaction() default true;
 }
