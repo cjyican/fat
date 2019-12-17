@@ -65,7 +65,7 @@ spring.application.name=fatboy-eureka-ribbon
 在需要开启分布式事务管理的入口方法中加入注解@FatServiceRegister，注意不要重复添加。dubbo的直接加在serviceImpl.method上面就可以了。
 ```java
 @RequestMapping("/user-service/{userId}/updateUserOrderNum1")
-@FatServiceRegister(serviceCount = 1 , localTransactionCount = 1)
+@FatServiceRegister
 public Integer updateUserOrderNum1(@PathVariable("userId") Long userId , @RequestParam("lastOrderId") Long lastOrderId ) throws Exception {
   int userResult = service.updateUserOrderNum(userId , lastOrderId);
   prodFeign.updateStock(1l);
@@ -75,17 +75,7 @@ public Integer updateUserOrderNum1(@PathVariable("userId") Long userId , @Reques
 ```
 注解解析
 ```java
-/**
- * 本地事务数量
- */
-int localTransactionCount() default 0; 
-/**
- * 服务数量
- * A-->B,A-->C ;A.serviceCount==2,B/C.serviceCoun==0
- * A-->B,A-->B ;A.serviceCount==2,B.serviceCoun==0
- * A-->B,B-->C ;A.serviceCont==1,B.serviceCont==1,C.serviceCount==0
- */
-int serviceCount() default 0;
+
 ```
 ### step3:业务方法加注解@FatTransaction纳入分布式管控
 注意@FatTransaction必须要与@Transactional配合使用已获取用户配置的事务信息，否则将会报错
@@ -163,17 +153,17 @@ private int queueCapacity ;
 private int keepAliveSeconds;
 ```
 ### 监听事务执行情况，业务结果的间歇时间
-根据项目运行情况配置，默认0.2秒
+根据项目运行情况配置，默认0.1秒
 ```java
 /**
  * 间歇消费时间（毫秒）默认200毫秒
  * 争抢可提交标识的时候，可能发生错误，避免继续阻塞，导致jdbcConnection/数据库事务迟迟不肯放手，为了提高响应速度，
  * 将pop的阻塞时间分段请求
  */
-@Value("${tx.commit.blankTime:200}")
+@Value("${tx.commit.blankTime:100}")
 private long commitBlankTime ;
 
-@Value("${tx.waitResult.blankTime:200}")
+@Value("${tx.waitResult.blankTime:100}")
 private long waitResultBlankTime;
 ```
 
@@ -188,7 +178,6 @@ private long waitResultBlankTime;
 public static final Map<String , String> buildRemoteData(){
     //返回新的对象，不开放修改入口，避免被客户端串改
     Map<String , String> map = new HashMap<>();
-    map.put(STR_REMOTE_TX_KEY, getLocalTxKey());
     map.put(STR_ROOT_TX_KEY, getRootTxKey());
     return map;
 }
