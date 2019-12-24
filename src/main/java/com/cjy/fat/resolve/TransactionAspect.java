@@ -59,7 +59,7 @@ public class TransactionAspect {
 		}
 		
 		String localTxMark = TransactionContent.getServiceId() + "-" + serviceMethod.getName();
-		TransactionResolveParam txParam = TransactionResolveParam.buildTxParam(fatTransaction , localTxMark);
+		TransactionResolveParam txParam = TransactionResolveParam.buildTxParam(localTxMark);
 		redisHelper.opsForGroupServiceSetOperation().addToGroupServiceSet(localTxMark);
 		
 		// 异步执行业务操作

@@ -60,7 +60,8 @@ public class ServiceRunningHandler {
 			
 			Object result = joinPoint.proceed();
 			// 写入执行结果返回主线程 ,改用本地阻塞式队列
-			param.offerToLocalResultQueue(result);
+//			param.offerToLocalResultQueue(result);
+			param.setLocalRunningResult(result);
 			
 			Logger.info(param.getLocalTxMark() + " is finished , transaction is waiting for commit");
 			
@@ -75,7 +76,8 @@ public class ServiceRunningHandler {
 			redisHelper.opsForServiceError().serviceError();
 			param.setLocalRunningException(e);
 			transactionManager.rollback(transStatus);
-			throw new Exception( param.getLocalTxMark() + " transaction rollback" ,e);
+//			throw new Exception( param.getLocalTxMark() + " transaction rollback" ,e);
+			e.printStackTrace();
 		}
 	}
 	

@@ -55,8 +55,8 @@ public class ServiceRegisterAspect {
 		Logger.error(ex.getMessage());
 	}
 
-	@AfterReturning(value = "txServiceRegister(txRegisterService)", returning = "sourceResult")
-	public void doAfterReturn(JoinPoint joinPoint, Object sourceResult, FatServiceRegister txRegisterService)
+	@AfterReturning(value = "txServiceRegister(txRegisterService)")
+	public void doAfterReturn(JoinPoint joinPoint, FatServiceRegister txRegisterService)
 			throws Exception {
 		commitResolver.clientProcced();
 	}

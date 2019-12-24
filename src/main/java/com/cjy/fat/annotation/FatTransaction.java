@@ -16,15 +16,15 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface FatTransaction {
 	
-	/**
-	 * 等待当前服务返回值的超时时间 , 默认3秒
-	 */
-	long waitResultMillisSeconds() default 3000;
-	
-	/**
-	 * 服务等待提交时间 ,默认3秒
-	 */
-	long waitCommitMillisSeconds() default 3000; 
+//	/**
+//	 * 等待当前服务返回值的超时时间 , 默认3秒
+//	 */
+//	long waitResultMillisSeconds() default 3000;
+//	
+//	/**
+//	 * 服务等待提交时间 ,默认3秒
+//	 */
+//	long waitCommitMillisSeconds() default 3000; 
 	
 	
 }

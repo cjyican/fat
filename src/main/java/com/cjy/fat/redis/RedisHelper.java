@@ -16,6 +16,7 @@ import com.cjy.fat.redis.operation.BlockMarkOperation;
 import com.cjy.fat.redis.operation.GroupCanCommitListOperation;
 import com.cjy.fat.redis.operation.GroupFinishSetOperation;
 import com.cjy.fat.redis.operation.GroupServiceSetOperation;
+import com.cjy.fat.redis.operation.MainThreadMarkOperation;
 import com.cjy.fat.redis.operation.ServiceErrorOperation;
 import com.cjy.fat.util.CollectionUtil;
 import com.cjy.fat.util.StringUtil;
@@ -216,5 +217,27 @@ public class RedisHelper {
 		}
 		return blockMarkOperation;
 	}
-	  
+	
+	private MainThreadMarkOperation mainThreadMarkOperation;
+	
+	public MainThreadMarkOperation opsForMainThreadMarkOperation() {
+		if(null == mainThreadMarkOperation) {
+			mainThreadMarkOperation = new MainThreadMarkOperation() {
+				
+				@Override
+				public void setFinshed() {
+					redis.opsForValue().set(RedisHelper.initTxRedisKey(RedisKeyEnum.MAIN_THREAD_MARK, TransactionContent.getRootTxKey()), NORMAL);
+				}
+				
+				@Override
+				public boolean isFinshed() {
+					if(StringUtils.isNotBlank(redis.opsForValue().get(RedisHelper.initTxRedisKey(RedisKeyEnum.MAIN_THREAD_MARK, TransactionContent.getRootTxKey())))) {
+						return true;
+					}
+					return false;
+				}
+			};
+		}
+		return mainThreadMarkOperation;
+	}
 }

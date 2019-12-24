@@ -18,6 +18,7 @@ public class ServiceRegisterResolver {
 		if(!txRegisterService.openTransaction()) {
 			return;
 		}
+		
 		if (StringUtils.isEmpty(TransactionContent.getRootTxKey())) {
 			String rootTxKey = redisHelper.createTxKey(TransactionContent.getServiceId());
 			TransactionContent.setRootTxKey(rootTxKey);
@@ -25,6 +26,8 @@ public class ServiceRegisterResolver {
 			// 初始化事务组回滚标识
 			redisHelper.opsForServiceError().serviceNomal();
 			
+			// 设置leader
+			TransactionContent.setLeader();
 		}
 		
 		// 将自己加入事务组
