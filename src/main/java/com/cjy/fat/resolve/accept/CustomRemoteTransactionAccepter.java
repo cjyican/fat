@@ -10,7 +10,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.data.TransactionContent;
-import com.cjy.fat.redis.RedisHelper;
 
 /**
  * 自定义服务api的远程信息接收器
@@ -20,9 +19,6 @@ import com.cjy.fat.redis.RedisHelper;
 @Component
 @ConditionalOnBean(type = {"com.cjy.fat.resolve.accept.CustomRemoteDataAdapter"})
 public class CustomRemoteTransactionAccepter implements RemoteTransactionAccepter{
-	
-	@Autowired
-	RedisHelper redisHelper;
 	
 	@Autowired
 	ApplicationContext context;

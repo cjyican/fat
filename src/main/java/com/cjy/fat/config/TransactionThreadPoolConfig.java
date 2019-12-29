@@ -17,7 +17,7 @@ public class TransactionThreadPoolConfig {
 	@Value("${fat.thread.max_pool_size:50}")
 	private int maxPoolSize ;
 	
-	@Value("${fat.thread.queue_capacity:200}")
+	@Value("${fat.thread.queue_capacity:1000}")
 	private int queueCapacity ;
 	
 	@Value("${fat.thread.keep_alive_seconds:60}")
@@ -30,7 +30,7 @@ public class TransactionThreadPoolConfig {
          executor.setMaxPoolSize(maxPoolSize);//最大线程数量
          executor.setQueueCapacity(queueCapacity);//缓冲数量
          executor.setKeepAliveSeconds(keepAliveSeconds);//60秒内该线程未被执行自动销毁
-         executor.setThreadNamePrefix("fat_resolve-");
+         executor.setThreadNamePrefix("fat_transaction-");
          executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
          executor.initialize();
          return executor;

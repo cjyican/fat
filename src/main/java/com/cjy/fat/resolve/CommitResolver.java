@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component;
 
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
-import com.cjy.fat.redis.RedisHelper;
+import com.cjy.fat.resolve.register.redis.RedisRegister;
 
 @Component
 public class CommitResolver {
 
 	@Autowired
-	RedisHelper redisHelper;
+	RedisRegister redisRegister;
 
 	/**
 	 * 间歇消费时间（毫秒）默认200毫秒
@@ -33,10 +33,10 @@ public class CommitResolver {
 	 */
 	public void blockProceed(TransactionResolveParam param) {
 		
-		redisHelper.opsForGroupFinishSetOperation().addToGroupFinishSet(param.getLocalTxMark());
+		redisRegister.opsForGroupFinishSetOperation().addToGroupFinishSet(param.getLocalTxMark());
 		
 		// 当事务分组协调器维护的txkey数量等于完成数量的时候 ， 告诉各localTxKey可以提交
-		if(redisHelper.opsForGroupFinishSetOperation().isGroupFinishZSetFull()) {
+		if(redisRegister.opsForGroupFinishSetOperation().isGroupFinishZSetFull()) {
 			
 			this.passGroupCancommitList();
 			
@@ -47,7 +47,7 @@ public class CommitResolver {
 	}
 	
 	public void passGroupCancommitList() {
-		redisHelper.opsForGroupCanCommitListOperation().pushGroupServiceSetToGroupCommitList();
+		redisRegister.opsForGroupCanCommitListOperation().pushGroupServiceSetToGroupCommitList();
 //		// 写入passed，后续block操作直接读标志位
 //		redisHelper.opsForBlockMarkOperation().passBlockMark();
 	}
@@ -64,11 +64,11 @@ public class CommitResolver {
 //			}
 			
 			if(!alreadyCancommit) {
-				String canCommit = redisHelper.opsForGroupCanCommitListOperation().popGroupCancommit(commitBlankTime);
+				String canCommit = redisRegister.opsForGroupCanCommitListOperation().popGroupCancommit(commitBlankTime);
 				
 				if(StringUtils.isBlank(canCommit)) {
 					
-					redisHelper.opsForServiceError().isServiceError();
+					redisRegister.opsForServiceError().isServiceError();
 					
 					continue;
 				}
@@ -79,7 +79,7 @@ public class CommitResolver {
 			
 				
 			//TODO 检查业务链路是否已经完成，可以提交
-			if(!redisHelper.opsForMainThreadMarkOperation().isFinshed()) {
+			if(!redisRegister.opsForMainThreadMarkOperation().isFinshed()) {
 				
 				continue;
 				
@@ -97,13 +97,13 @@ public class CommitResolver {
 	 */
 	public void clientProcced(){
 //		redisHelper.opsForServiceError().isServiceError();
-		redisHelper.opsForGroupFinishSetOperation().addToGroupFinishSet(TransactionContent.getServiceId());
+		redisRegister.opsForGroupFinishSetOperation().addToGroupFinishSet(TransactionContent.getServiceId());
 		// 当事务分组协调器维护的txkey数量等于完成数量的时候 ， 告诉各localTxKey可以提交
-		if(redisHelper.opsForGroupFinishSetOperation().isGroupFinishZSetFull()) {	
+		if(redisRegister.opsForGroupFinishSetOperation().isGroupFinishZSetFull()) {	
 			this.passGroupCancommitList();
 		}
 		if(TransactionContent.isLeader()) {
-			redisHelper.opsForMainThreadMarkOperation().setFinshed();
+			redisRegister.opsForMainThreadMarkOperation().setFinshed();
 		}
 	}
 	

@@ -17,8 +17,8 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
-import com.cjy.fat.redis.RedisHelper;
 import com.cjy.fat.resolve.CommitResolver;
+import com.cjy.fat.resolve.register.redis.RedisRegister;
 
 @Service
 @ConditionalOnClass(value= {DataSourceTransactionManager.class})
@@ -30,7 +30,7 @@ public class ServiceRunningHandler {
 	private static final Logger Logger = LoggerFactory.getLogger(ServiceRunningHandler.class);
 
 	@Autowired
-	RedisHelper redisHelper;
+	RedisRegister redisRegister;
 	
 	@Autowired
 	CommitResolver commitResolver;
@@ -56,11 +56,10 @@ public class ServiceRunningHandler {
 		try {
 			Logger.info(param.getLocalTxMark() + " transaction start" );
 			
-			redisHelper.opsForServiceError().isServiceError();
+			redisRegister.opsForServiceError().isServiceError();
 			
 			Object result = joinPoint.proceed();
-			// 写入执行结果返回主线程 ,改用本地阻塞式队列
-//			param.offerToLocalResultQueue(result);
+			
 			param.setLocalRunningResult(result);
 			
 			Logger.info(param.getLocalTxMark() + " is finished , transaction is waiting for commit");
@@ -73,10 +72,12 @@ public class ServiceRunningHandler {
 			Logger.info( param.getLocalTxMark() +  " transaction commit");
 			
 		} catch (Exception e) {
-			redisHelper.opsForServiceError().serviceError();
+			redisRegister.opsForServiceError().serviceError();
+			
 			param.setLocalRunningException(e);
+			
 			transactionManager.rollback(transStatus);
-//			throw new Exception( param.getLocalTxMark() + " transaction rollback" ,e);
+			
 			e.printStackTrace();
 		}
 	}

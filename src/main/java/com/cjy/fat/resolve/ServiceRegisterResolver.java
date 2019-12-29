@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 
 import com.cjy.fat.annotation.FatServiceRegister;
 import com.cjy.fat.data.TransactionContent;
-import com.cjy.fat.redis.RedisHelper;
+import com.cjy.fat.resolve.register.redis.RedisRegister;
 
 @Component
 public class ServiceRegisterResolver {
 
 	@Autowired
-	RedisHelper redisHelper;
+	RedisRegister redisRegister;
 	
 	public void registerService(FatServiceRegister txRegisterService ){
 		if(!txRegisterService.openTransaction()) {
@@ -20,18 +20,18 @@ public class ServiceRegisterResolver {
 		}
 		
 		if (StringUtils.isEmpty(TransactionContent.getRootTxKey())) {
-			String rootTxKey = redisHelper.createTxKey(TransactionContent.getServiceId());
+			String rootTxKey = redisRegister.createTxKey(TransactionContent.getServiceId());
 			TransactionContent.setRootTxKey(rootTxKey);
 			
 			// 初始化事务组回滚标识
-			redisHelper.opsForServiceError().serviceNomal();
+			redisRegister.opsForServiceError().serviceNomal();
 			
 			// 设置leader
 			TransactionContent.setLeader();
 		}
 		
 		// 将自己加入事务组
-		redisHelper.opsForGroupServiceSetOperation().addToGroupServiceSet(TransactionContent.getServiceId());
+		redisRegister.opsForGroupServiceSetOperation().addToGroupServiceSet(TransactionContent.getServiceId());
 		
 	}
 	

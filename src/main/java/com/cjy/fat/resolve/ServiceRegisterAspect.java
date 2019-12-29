@@ -14,7 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.annotation.FatServiceRegister;
-import com.cjy.fat.redis.RedisHelper;
+import com.cjy.fat.resolve.register.redis.RedisRegister;
 
 @Aspect
 @Component
@@ -24,7 +24,7 @@ public class ServiceRegisterAspect {
 	private static final Logger Logger = LoggerFactory.getLogger(ServiceRegisterAspect.class);
 	
 	@Autowired
-	RedisHelper redisHelper;
+	RedisRegister redisRegister;
 
 	@Value("${spring.application.name}")
 	String serviceName;
@@ -51,7 +51,7 @@ public class ServiceRegisterAspect {
 
 	@AfterThrowing(value="txServiceRegister(txRegisterService)" , throwing = "ex")
 	public void handleThrowing(JoinPoint joinPoint, FatServiceRegister txRegisterService , Exception ex ) {
-		redisHelper.opsForServiceError().serviceError();
+		redisRegister.opsForServiceError().serviceError();
 		Logger.error(ex.getMessage());
 	}
 

@@ -1,4 +1,4 @@
-package com.cjy.fat.redis.operation;
+package com.cjy.fat.resolve.register.operation;
 
 public interface GroupServiceSetOperation {
 	

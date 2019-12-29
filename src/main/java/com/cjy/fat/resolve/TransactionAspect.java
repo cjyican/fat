@@ -20,8 +20,8 @@ import com.cjy.fat.annotation.FatTransaction;
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
 import com.cjy.fat.exception.FatTransactionException;
-import com.cjy.fat.redis.RedisHelper;
 import com.cjy.fat.resolve.handler.ServiceRunningHandler;
+import com.cjy.fat.resolve.register.redis.RedisRegister;
 
 @Aspect
 @Component
@@ -30,7 +30,7 @@ import com.cjy.fat.resolve.handler.ServiceRunningHandler;
 public class TransactionAspect {
 	
 	@Autowired
-	RedisHelper redisHelper;
+	RedisRegister redisRegister;
 
 	@Autowired
 	ServiceRunningHandler serviceHandler;
@@ -60,7 +60,7 @@ public class TransactionAspect {
 		
 		String localTxMark = TransactionContent.getServiceId() + "-" + serviceMethod.getName();
 		TransactionResolveParam txParam = TransactionResolveParam.buildTxParam(localTxMark);
-		redisHelper.opsForGroupServiceSetOperation().addToGroupServiceSet(localTxMark);
+		redisRegister.opsForGroupServiceSetOperation().addToGroupServiceSet(localTxMark);
 		
 		// 异步执行业务操作
 		serviceHandler.proceed(proceedingJoinPoint , transactionalAnno, txParam ,TransactionContent.getRootTxKey());
