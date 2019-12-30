@@ -23,8 +23,9 @@ public interface ServiceRegister {
 	 * 生成一次分布式事务的key
 	 * @param serviceName 当前服务系统名称
 	 * @return
+	 * @throws Exception 
 	 */
-	String createTxKey(String serviceName);
+	String createTxKey(ServiceNameSpace nameSpace) throws Exception;
 	
 	/**
 	 * 获取事务失败操作类

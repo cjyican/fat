@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
-import com.cjy.fat.resolve.register.redis.RedisRegister;
+import com.cjy.fat.resolve.register.RedisRegister;
 
 @Component
 public class CommitResolver {

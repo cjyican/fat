@@ -18,7 +18,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
 import com.cjy.fat.resolve.CommitResolver;
-import com.cjy.fat.resolve.register.redis.RedisRegister;
+import com.cjy.fat.resolve.register.RedisRegister;
 
 @Service
 @ConditionalOnClass(value= {DataSourceTransactionManager.class})

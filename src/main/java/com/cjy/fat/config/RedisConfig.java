@@ -17,7 +17,7 @@ import redis.clients.jedis.JedisPoolConfig;
 @Configuration
 public class RedisConfig {
 
-	@Value("${fat.redis.host:127.0.0.1}")
+	@Value("${fat.redis.host}")
 	private String host;
 
 	@Value("${fat.redis.database:0}")
@@ -51,7 +51,12 @@ public class RedisConfig {
 	private int maxRedirects;
 	
 	@Bean
-	public RedisTemplate<String, Object> fatRedis() { 
+	public RedisTemplate<String, Object> fatRedis() {
+		
+		if(StringUtils.isBlank(host)) {
+			return null;
+		}
+		
 		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<String, Object>(); 
 		redisTemplate.setConnectionFactory(this.connectionFactory());
 		StringRedisSerializer stringRedisSerializer =new StringRedisSerializer(); 
@@ -60,6 +65,7 @@ public class RedisConfig {
 		redisTemplate.setHashKeySerializer(stringRedisSerializer); 
 		redisTemplate.setHashValueSerializer(stringRedisSerializer);
 		return redisTemplate; 
+		
 	}
 
 	public RedisConnectionFactory connectionFactory() {

@@ -14,7 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.annotation.FatServiceRegister;
-import com.cjy.fat.resolve.register.redis.RedisRegister;
+import com.cjy.fat.resolve.register.RedisRegister;
 
 @Aspect
 @Component

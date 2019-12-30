@@ -21,7 +21,7 @@ import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
 import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.resolve.handler.ServiceRunningHandler;
-import com.cjy.fat.resolve.register.redis.RedisRegister;
+import com.cjy.fat.resolve.register.RedisRegister;
 
 @Aspect
 @Component

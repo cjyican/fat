@@ -1,4 +1,4 @@
-package com.cjy.fat.resolve.register.redis;
+package com.cjy.fat.resolve.register;
 
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -6,12 +6,12 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.exception.FatTransactionException;
-import com.cjy.fat.resolve.register.ServiceRegister;
 import com.cjy.fat.resolve.register.operation.GroupCanCommitListOperation;
 import com.cjy.fat.resolve.register.operation.GroupFinishSetOperation;
 import com.cjy.fat.resolve.register.operation.GroupServiceSetOperation;
@@ -21,30 +21,18 @@ import com.cjy.fat.resolve.register.servicenode.ServiceNameSpace;
 import com.cjy.fat.util.StringUtil;
 
 @Component
-public class RedisRegister implements ServiceRegister{
+public class RedisRegister extends AbstractRegister{
 	
 	@Resource(name = "fatRedis")
 	RedisTemplate<String, String> redis;
 	
-	private GroupCanCommitListOperation groupCanCommitListOperation;
-	
-	private ServiceErrorOperation serviceErrorOperation;
-	
-	private GroupFinishSetOperation groupFinishSetOperation;
-	
-	private GroupServiceSetOperation groupServiceSetOperation ; 
-	
-	private MainThreadMarkOperation mainThreadMarkOperation;
+	@Value("${spring.application.name}")
+	String serviceName;
 	
 	@Override
-	public String createTxKey(String serviceName){
-		String redisTxKeyId = redis.opsForValue().get(ServiceNameSpace.FAT_KEY_ID.getNameSpace());
-		if(StringUtils.isBlank(redisTxKeyId)){
-			//初始化
-			redis.opsForValue().set(ServiceNameSpace.FAT_KEY_ID.getNameSpace(), String.valueOf(System.currentTimeMillis()));
-		}
-		Long txKeyId = redis.opsForValue().increment(ServiceNameSpace.FAT_KEY_ID.getNameSpace(), 1);
-		return StringUtil.appendStr(serviceName ,"-" ,String.valueOf(txKeyId) );
+	public String createTxKey(ServiceNameSpace nameSpace){
+		Long txKeyId = redis.opsForValue().increment(nameSpace.getNameSpace(), 1);
+		return  serviceName + StringUtil.initTxKey(txKeyId + "");
 	}
 	
 	
