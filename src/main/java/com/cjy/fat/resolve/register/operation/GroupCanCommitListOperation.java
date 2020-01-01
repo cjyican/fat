@@ -4,8 +4,9 @@ public interface GroupCanCommitListOperation {
 	
 	/**
 	 * 将groupServiceSet的元素放入到groupCancommit
+	 * @throws Exception 
 	 */
-	public void pushGroupServiceSetToGroupCommitList();
+	public void groupCanCommit() throws Exception;
 	
 	/**
 	 * 获取事务分组协调器可提交标识
@@ -13,7 +14,7 @@ public interface GroupCanCommitListOperation {
 	 * @param waitMilliesSecond
 	 * @return
 	 */
-	public String popGroupCancommit( long waitMilliesSecond) ;
+	public String watchGroupCanCommit( long waitMilliesSecond) throws Exception ;
 	
 	
 }

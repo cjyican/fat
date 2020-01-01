@@ -14,7 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.annotation.FatServiceRegister;
-import com.cjy.fat.resolve.register.RedisRegister;
+import com.cjy.fat.resolve.register.ServiceRegister;
 
 @Aspect
 @Component
@@ -24,7 +24,7 @@ public class ServiceRegisterAspect {
 	private static final Logger Logger = LoggerFactory.getLogger(ServiceRegisterAspect.class);
 	
 	@Autowired
-	RedisRegister redisRegister;
+	ServiceRegister register;
 
 	@Value("${spring.application.name}")
 	String serviceName;
@@ -44,14 +44,14 @@ public class ServiceRegisterAspect {
 	}
 
 	@Before("txServiceRegister(txRegisterService)")
-	public void doBefore(JoinPoint joinPoint, FatServiceRegister txRegisterService) {
+	public void doBefore(JoinPoint joinPoint, FatServiceRegister txRegisterService) throws Exception {
 		remoteTransactionDataResolver.init();
 		serviceRegister.registerService(txRegisterService);
 	}
 
 	@AfterThrowing(value="txServiceRegister(txRegisterService)" , throwing = "ex")
-	public void handleThrowing(JoinPoint joinPoint, FatServiceRegister txRegisterService , Exception ex ) {
-		redisRegister.opsForServiceError().serviceError();
+	public void handleThrowing(JoinPoint joinPoint, FatServiceRegister txRegisterService , Exception ex ) throws Exception{
+		register.opsForServiceError().serviceError();
 		Logger.error(ex.getMessage());
 	}
 

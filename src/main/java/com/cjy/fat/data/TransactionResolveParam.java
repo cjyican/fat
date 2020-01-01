@@ -16,19 +16,6 @@ public class TransactionResolveParam {
 	 * 当前txKey所属的事务分组协调器 ， 当txKey与rootTxKey相等的时候，表示不要
 	 */
 	private String rootTxKey;
-//	/**
-//	 * 等待事务提交时长
-//	 */
-//	private long waitCommitMilliesSeconds;
-//	/**
-//	 * 等待业务操作结果时常，注意，当服务已经完成业务操作，该等待操作不允许影响整个事务组的提交与回滚
-//	 */
-//	private long waitResultMilliesSeconds;
-//	/**
-//	 * 业务方法返回值监听队列
-//	 * @return
-//	 */
-//	private BlockingQueue<Object> localResultQueue = new ArrayBlockingQueue<>(1);
 	
 	private volatile Object localRunningResult;
 	
@@ -45,8 +32,6 @@ public class TransactionResolveParam {
 		TransactionResolveParam bean = new TransactionResolveParam();
 		bean.rootTxKey = TransactionContent.getRootTxKey();
 		bean.localTxMark = localTxName;
-//		bean.waitCommitMilliesSeconds = fatTransaction.waitCommitMillisSeconds();
-//		bean.waitResultMilliesSeconds = fatTransaction.waitResultMillisSeconds();
 		return bean;
 	}
 	
@@ -57,22 +42,6 @@ public class TransactionResolveParam {
 	public void setLocalRunningException(Exception localRunningException) {
 		this.localRunningException = localRunningException;
 	}
-	
-//	public long getWaitResultMilliesSeconds() {
-//		return waitResultMilliesSeconds;
-//	}
-//	
-//	public void setWaitResultMilliesSeconds(long waitResultMilliesSeconds) {
-//		this.waitResultMilliesSeconds = waitResultMilliesSeconds;
-//	}
-//	
-//	public long getWaitCommitMilliesSeconds() {
-//		return waitCommitMilliesSeconds;
-//	}
-//	
-//	public void setWaitCommitMilliesSeconds(long waitCommitMilliesSeconds) {
-//		this.waitCommitMilliesSeconds = waitCommitMilliesSeconds;
-//	}
 	
 	public String getLocalTxMark() {
 		return localTxMark;
@@ -86,14 +55,6 @@ public class TransactionResolveParam {
 	public void setRootTxKey(String rootTxKey) {
 		this.rootTxKey = rootTxKey;
 	}
-	
-//	public Object pollFromLocalResultQueue(long timeOut) throws InterruptedException {
-//		return localResultQueue.poll(timeOut, TimeUnit.MILLISECONDS);
-//	}
-//	
-//	public void offerToLocalResultQueue(Object result) {
-//		localResultQueue.offer(result);
-//	}
 	
 	public void setLocalRunningResult(Object localRunningResult) {
 		this.localRunningResult = localRunningResult;

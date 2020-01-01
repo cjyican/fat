@@ -18,7 +18,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
 import com.cjy.fat.resolve.CommitResolver;
-import com.cjy.fat.resolve.register.RedisRegister;
+import com.cjy.fat.resolve.register.ServiceRegister;
 
 @Service
 @ConditionalOnClass(value= {DataSourceTransactionManager.class})
@@ -30,7 +30,7 @@ public class ServiceRunningHandler {
 	private static final Logger Logger = LoggerFactory.getLogger(ServiceRunningHandler.class);
 
 	@Autowired
-	RedisRegister redisRegister;
+	ServiceRegister register;
 	
 	@Autowired
 	CommitResolver commitResolver;
@@ -56,7 +56,7 @@ public class ServiceRunningHandler {
 		try {
 			Logger.info(param.getLocalTxMark() + " transaction start" );
 			
-			redisRegister.opsForServiceError().isServiceError();
+			register.opsForServiceError().isServiceError();
 			
 			Object result = joinPoint.proceed();
 			
@@ -72,7 +72,8 @@ public class ServiceRunningHandler {
 			Logger.info( param.getLocalTxMark() +  " transaction commit");
 			
 		} catch (Exception e) {
-			redisRegister.opsForServiceError().serviceError();
+			
+			register.opsForServiceError().serviceError();
 			
 			param.setLocalRunningException(e);
 			

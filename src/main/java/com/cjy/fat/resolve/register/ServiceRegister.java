@@ -1,13 +1,10 @@
 package com.cjy.fat.resolve.register;
 
-import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.resolve.register.operation.GroupCanCommitListOperation;
 import com.cjy.fat.resolve.register.operation.GroupFinishSetOperation;
 import com.cjy.fat.resolve.register.operation.GroupServiceSetOperation;
-import com.cjy.fat.resolve.register.operation.MainThreadMarkOperation;
 import com.cjy.fat.resolve.register.operation.ServiceErrorOperation;
-import com.cjy.fat.resolve.register.servicenode.ServiceNameSpace;
-import com.cjy.fat.util.StringUtil;
+import com.cjy.fat.resolve.register.servicenode.NameSpace;
 
 public interface ServiceRegister {
 	
@@ -15,9 +12,9 @@ public interface ServiceRegister {
 	
 	static final String ERROR = "1";
 	
-	default String initTxRedisKey(ServiceNameSpace nameSapce){
-		return StringUtil.appendStr(ServiceNameSpace.FAT_PRE.getNameSpace() , TransactionContent.getRootTxKey() , nameSapce.getNameSpace() );
-	}
+	static final String REDIS_MARK = ":";
+	
+	static final String ZOO_MARK = "/";
 	
 	/**
 	 * 生成一次分布式事务的key
@@ -25,7 +22,7 @@ public interface ServiceRegister {
 	 * @return
 	 * @throws Exception 
 	 */
-	String createTxKey(ServiceNameSpace nameSpace) throws Exception;
+	String createTxKey(NameSpace nameSpace) throws Exception;
 	
 	/**
 	 * 获取事务失败操作类
@@ -50,11 +47,5 @@ public interface ServiceRegister {
 	 * @return
 	 */
 	GroupServiceSetOperation opsForGroupServiceSetOperation();
-
-	/**
-	 * 获取主流程完成表示操作类
-	 * @return
-	 */
-	MainThreadMarkOperation opsForMainThreadMarkOperation();
 	
 }

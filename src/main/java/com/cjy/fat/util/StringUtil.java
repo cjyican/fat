@@ -11,11 +11,11 @@ public class StringUtil {
 	}
 	
 	public static String appendStr(String ...strings ){
-		StringBuffer sb = new StringBuffer();
+		String s = "";
 		for(int i = 0 ; i < strings.length ;i ++){
-			sb.append(strings[i]);
+			s += strings[i];
 		}
-		return sb.toString();
+		return s;
 	}
 	
 	public static String initTxKey(String seq) {

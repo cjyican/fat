@@ -17,7 +17,7 @@ import com.cjy.fat.data.TransactionContent;
  *
  */
 @Component
-@ConditionalOnBean(type = {"com.cjy.fat.resolve.accept.CustomRemoteDataAdapter"})
+@ConditionalOnBean(CustomRemoteDataAdapter.class)
 public class CustomRemoteTransactionAccepter implements RemoteTransactionAccepter{
 	
 	@Autowired

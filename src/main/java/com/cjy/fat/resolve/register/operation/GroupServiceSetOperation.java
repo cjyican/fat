@@ -2,8 +2,8 @@ package com.cjy.fat.resolve.register.operation;
 
 public interface GroupServiceSetOperation {
 	
-	void addToGroupServiceSet(String ele);
+	void addToGroupServiceSet(String ele) throws Exception;
 
-	long sizeGroupSeviceSet();
+	long sizeGroupSeviceSet() throws Exception;
 	
 }

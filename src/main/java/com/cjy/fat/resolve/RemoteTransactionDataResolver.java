@@ -20,19 +20,13 @@ public class RemoteTransactionDataResolver {
 	public void init() {
 		//初始化当前容器
 		TransactionContent.initContainer();
-//		String[] accepterNames = context.getBeanNamesForType(RemoteTransactionAccepter.class);
-//		if(accepterNames != null && accepterNames.length > 0) {
-//			for(int i = 0 ; i < accepterNames.length ; i++) {
-//				LOG.info("load {} " , accepterNames[i]);
-//				RemoteTransactionAccepter accepter = (RemoteTransactionAccepter) context.getBean(accepterNames[i]);
-//				accepter.acceptRemoteTransactionData();
-//			}
-//		}
+		
 		if(accepters != null && !accepters.isEmpty()) {
 			for(RemoteTransactionAccepter accepter : accepters) {
 				accepter.acceptRemoteTransactionData();
 			}
 		}
+		
 	}
 	
 }

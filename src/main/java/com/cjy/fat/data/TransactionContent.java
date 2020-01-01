@@ -44,20 +44,28 @@ public class TransactionContent {
 		container.get().setServiceId(serviceId);
 	}
 	
-	public static void setLeader() {
-		container.get().setLeader();
-	}
-	
-	public static boolean isLeader() {
-		return container.get().isLeader();
-	}
-	
 	/**
 	 * 由于使用了线程池，当线程复用的时候，TheadLocal依然存在，需要在请求入口清空ThreadLocal
 	 */
 	public static final void initContainer(){
 		container.remove();
 		container.set(new TransactionThreadLocal());
+	}
+	
+	/**
+	 * 由于使用了线程池，当线程复用的时候，TheadLocal依然存在，需要在请求入口清空ThreadLocal
+	 */
+	public static final void setContainer(TransactionThreadLocal localData){
+		container.remove();
+		container.set(localData);
+	}
+	
+	/**
+	 * 由于使用了线程池，当线程复用的时候，TheadLocal依然存在，需要在请求入口清空ThreadLocal
+	 * @return 
+	 */
+	public static final TransactionThreadLocal getLocalData(){
+		return container.get();
 	}
 	
 }

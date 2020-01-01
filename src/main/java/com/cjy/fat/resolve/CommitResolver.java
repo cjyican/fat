@@ -7,13 +7,13 @@ import org.springframework.stereotype.Component;
 
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
-import com.cjy.fat.resolve.register.RedisRegister;
+import com.cjy.fat.resolve.register.ServiceRegister;
 
 @Component
 public class CommitResolver {
 
 	@Autowired
-	RedisRegister redisRegister;
+	ServiceRegister register;
 
 	/**
 	 * 间歇消费时间（毫秒）默认200毫秒
@@ -23,20 +23,17 @@ public class CommitResolver {
 	@Value("${tx.commit.blankTime:100}")
 	private long commitBlankTime ;
 	
-//	@Value("${tx.waitResult.blankTime:100}")
-//	private long waitResultBlankTime;
-	
 	/**
 	 * 阻塞式提交 , 用于事务
 	 * 
 	 * @param param
 	 */
-	public void blockProceed(TransactionResolveParam param) {
+	public void blockProceed(TransactionResolveParam param) throws Exception{
 		
-		redisRegister.opsForGroupFinishSetOperation().addToGroupFinishSet(param.getLocalTxMark());
+		register.opsForGroupFinishSetOperation().addToGroupFinishSet(param.getLocalTxMark());
 		
 		// 当事务分组协调器维护的txkey数量等于完成数量的时候 ， 告诉各localTxKey可以提交
-		if(redisRegister.opsForGroupFinishSetOperation().isGroupFinishZSetFull()) {
+		if(register.opsForGroupFinishSetOperation().isGroupFinishZSetFull()) {
 			
 			this.passGroupCancommitList();
 			
@@ -46,65 +43,45 @@ public class CommitResolver {
 		this.popGroupCanCommitList();
 	}
 	
-	public void passGroupCancommitList() {
-		redisRegister.opsForGroupCanCommitListOperation().pushGroupServiceSetToGroupCommitList();
-//		// 写入passed，后续block操作直接读标志位
-//		redisHelper.opsForBlockMarkOperation().passBlockMark();
+	public void passGroupCancommitList() throws Exception{
+		
+		register.opsForGroupCanCommitListOperation().groupCanCommit();
+		
 	}
 	
-	public boolean popGroupCanCommitList() {
-//		long endTime = System.currentTimeMillis() + waitMilliesSeconds;
-		
-		boolean alreadyCancommit = false;
+	public boolean popGroupCanCommitList() throws Exception{
 		while(true) {
-
-//			boolean isPassed = redisHelper.opsForBlockMarkOperation().isBlockMarkPassed();
-//			if(isPassed) {
-//				return true;
-//			}
 			
-			if(!alreadyCancommit) {
-				String canCommit = redisRegister.opsForGroupCanCommitListOperation().popGroupCancommit(commitBlankTime);
-				
-				if(StringUtils.isBlank(canCommit)) {
-					
-					redisRegister.opsForServiceError().isServiceError();
-					
-					continue;
-				}
-				
-				alreadyCancommit = true;
-				
-			}
+			String canCommit = register.opsForGroupCanCommitListOperation().watchGroupCanCommit(commitBlankTime);
 			
+			if(StringUtils.isBlank(canCommit)) {
 				
-			//TODO 检查业务链路是否已经完成，可以提交
-			if(!redisRegister.opsForMainThreadMarkOperation().isFinshed()) {
+				register.opsForServiceError().isServiceError();
 				
 				continue;
-				
 			}
 			
 			return true;
 			
 		}
-//		throw new FatTransactionException(TransactionContent.getRootTxKey(), " local transaction is finished, wait for commit timeout");
+		
 	}
 	
 	/**
 	 * 客户端提交过程
 	 * @param param
+	 * @throws Exception 
 	 */
-	public void clientProcced(){
-//		redisHelper.opsForServiceError().isServiceError();
-		redisRegister.opsForGroupFinishSetOperation().addToGroupFinishSet(TransactionContent.getServiceId());
+	public void clientProcced() throws Exception{
+		register.opsForGroupFinishSetOperation().addToGroupFinishSet(TransactionContent.getServiceId());
+		
 		// 当事务分组协调器维护的txkey数量等于完成数量的时候 ， 告诉各localTxKey可以提交
-		if(redisRegister.opsForGroupFinishSetOperation().isGroupFinishZSetFull()) {	
+		if(register.opsForGroupFinishSetOperation().isGroupFinishZSetFull()) {	
+			
 			this.passGroupCancommitList();
+			
 		}
-		if(TransactionContent.isLeader()) {
-			redisRegister.opsForMainThreadMarkOperation().setFinshed();
-		}
+		
 	}
 	
 	/**
@@ -115,34 +92,20 @@ public class CommitResolver {
 	 */
 	public Object waitServiceResult(TransactionResolveParam param) throws Exception {
 		Object serviceResult = null;
-//		long endTime = System.currentTimeMillis() + param.getWaitResultMilliesSeconds();
 		while(true) {
+			
 			//检查是否事务出错
 			if(null != param.getLocalRunningException()) {
 				throw param.getLocalRunningException();
 			}
-//			serviceResult = param.pollFromLocalResultQueue(waitResultBlankTime);
+			
 			serviceResult = param.getLocalRunningResult();
 			if(null != serviceResult) {
 				break;
 			}
+			
 		}
-		//等待超时，查看是否可以阻止事务提交
-//		if(null == serviceResult) {
-//			boolean isPassed = redisHelper.opsForBlockMarkOperation().isBlockMarkPassed();
-//			if(!isPassed) {
-//				throw new FatTransactionException(param.getRootTxKey(), "wait result time out , transaction roll back ");
-//			}
-//			//不能阻止事务提交，进入等待
-//			while(true) {
-//				//检查是否事务出错
-//				redisHelper.opsForServiceError().isServiceError();
-//				serviceResult = param.pollFromLocalResultQueue(waitResultBlankTime);
-//				if(null != serviceResult) {
-//					break;
-//				}
-//			}
-//		}
+		
 		return serviceResult;
 	}
 

@@ -5,22 +5,22 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.resolve.register.operation.GroupCanCommitListOperation;
 import com.cjy.fat.resolve.register.operation.GroupFinishSetOperation;
 import com.cjy.fat.resolve.register.operation.GroupServiceSetOperation;
-import com.cjy.fat.resolve.register.operation.MainThreadMarkOperation;
 import com.cjy.fat.resolve.register.operation.ServiceErrorOperation;
-import com.cjy.fat.resolve.register.servicenode.ServiceNameSpace;
+import com.cjy.fat.resolve.register.servicenode.NameSpace;
+import com.cjy.fat.resolve.register.servicenode.RedisNameSpaceAppender;
 import com.cjy.fat.util.StringUtil;
 
 @Component
+@ConditionalOnBean(name = {"fatRedis"})
 public class RedisRegister extends AbstractRegister{
 	
 	@Resource(name = "fatRedis")
@@ -29,8 +29,12 @@ public class RedisRegister extends AbstractRegister{
 	@Value("${spring.application.name}")
 	String serviceName;
 	
+	RedisRegister(){
+		super(new RedisNameSpaceAppender());
+	}
+	
 	@Override
-	public String createTxKey(ServiceNameSpace nameSpace){
+	public String createTxKey(NameSpace nameSpace){
 		Long txKeyId = redis.opsForValue().increment(nameSpace.getNameSpace(), 1);
 		return  serviceName + StringUtil.initTxKey(txKeyId + "");
 	}
@@ -42,15 +46,15 @@ public class RedisRegister extends AbstractRegister{
 	 * @param keyEnum
 	 * @return
 	 */
-	public long sizeList(String txKey , ServiceNameSpace keyEnum){
-		return redis.opsForList().size(initTxRedisKey(keyEnum));
+	public long sizeList(String txKey , NameSpace keyEnum){
+		return redis.opsForList().size(appendNameSpace(keyEnum));
 	}
 	
 	/**
 	 * 获取某个Set的全部元素
 	 */
-	public Set<String> getAllFromSet(ServiceNameSpace setKeyEnum){
-		return redis.opsForSet().members(initTxRedisKey(setKeyEnum));
+	public Set<String> getAllFromSet(NameSpace setKeyEnum){
+		return redis.opsForSet().members(appendNameSpace(setKeyEnum));
 	}
 	
 	/**
@@ -59,14 +63,14 @@ public class RedisRegister extends AbstractRegister{
 	 * @param waitMilliesSecond
 	 * @return
 	 */
-	public void pushAllBlockList(ServiceNameSpace keyEnum ,Set<String> dataSet) {
-		redis.opsForList().leftPushAll(initTxRedisKey(keyEnum), dataSet);
+	public void pushAllBlockList(NameSpace keyEnum ,Set<String> dataSet) {
+		redis.opsForList().leftPushAll(appendNameSpace(keyEnum), dataSet);
 	}
 	
 	/**
 	 * 将指定set的元素放入指定的阻塞队列
 	 */
-	public void pushToBlockListFromSet(ServiceNameSpace setTxKeyEnum , ServiceNameSpace listTxKeyEnum){
+	public void pushToBlockListFromSet(NameSpace setTxKeyEnum , NameSpace listTxKeyEnum){
 		Set<String> dataSet = getAllFromSet(setTxKeyEnum);
 		pushAllBlockList(listTxKeyEnum, dataSet);
 	}
@@ -77,8 +81,8 @@ public class RedisRegister extends AbstractRegister{
 	 * @param waitMilliesSecond
 	 * @return
 	 */
-	public String popBlockList(String txKey ,ServiceNameSpace keyEnum ,long waitMilliesSecond) {
-		return redis.opsForList().leftPop(initTxRedisKey(keyEnum), waitMilliesSecond, TimeUnit.MILLISECONDS);
+	public String popBlockList(String txKey ,NameSpace keyEnum ,long waitMilliesSecond) {
+		return redis.opsForList().leftPop(appendNameSpace(keyEnum), waitMilliesSecond, TimeUnit.MILLISECONDS);
 	}
 	
 	@Override
@@ -87,17 +91,17 @@ public class RedisRegister extends AbstractRegister{
 			serviceErrorOperation = new ServiceErrorOperation() {
 				@Override
 				public void serviceNomal() {
-					redis.opsForValue().set(initTxRedisKey(ServiceNameSpace.IS_SERVICE_ERROR) , NORMAL);
+					redis.opsForValue().set(appendNameSpace(NameSpace.IS_SERVICE_ERROR) , NORMAL);
 				}
 				@Override
 				public void serviceError() {
-					redis.opsForValue().set(initTxRedisKey(ServiceNameSpace.IS_SERVICE_ERROR) , ERROR);
+					redis.opsForValue().set(appendNameSpace(NameSpace.IS_SERVICE_ERROR) , ERROR);
 				}
 				@Override
 				public void isServiceError() {
-					boolean isError = redis.opsForValue().get(initTxRedisKey(ServiceNameSpace.IS_SERVICE_ERROR)).equals(ERROR);
+					boolean isError = redis.opsForValue().get(appendNameSpace(NameSpace.IS_SERVICE_ERROR)).equals(ERROR);
 					if(isError){
-						throw new FatTransactionException(TransactionContent.getRootTxKey(), " other service occured error when runnning local transaction");
+						throw new FatTransactionException(" other service occured error when runnning local transaction");
 					}
 				}
 			};
@@ -110,12 +114,12 @@ public class RedisRegister extends AbstractRegister{
 		if(null == groupCanCommitListOperation) {
 			groupCanCommitListOperation = new GroupCanCommitListOperation() {
 				@Override
-				public void pushGroupServiceSetToGroupCommitList() {
-					pushToBlockListFromSet(ServiceNameSpace.GROUP_SERVICE_SET, ServiceNameSpace.GROUP_CANCOMMIT_LIST);
+				public void groupCanCommit() {
+					pushToBlockListFromSet(NameSpace.GROUP_SERVICE_SET, NameSpace.GROUP_CANCOMMIT_LIST);
 				}
 				@Override
-				public String popGroupCancommit( long waitMilliesSecond) {
-					return redis.opsForList().leftPop(initTxRedisKey(ServiceNameSpace.GROUP_CANCOMMIT_LIST), waitMilliesSecond, TimeUnit.MILLISECONDS);
+				public String watchGroupCanCommit( long waitMilliesSecond) {
+					return redis.opsForList().leftPop(appendNameSpace(NameSpace.GROUP_CANCOMMIT_LIST), waitMilliesSecond, TimeUnit.MILLISECONDS);
 				}
 			};
 		}
@@ -127,15 +131,15 @@ public class RedisRegister extends AbstractRegister{
 		if(null == groupFinishSetOperation) {
 			groupFinishSetOperation = new GroupFinishSetOperation() {
 				@Override
-				public void addToGroupFinishSet(String localTxKey) {
-					redis.opsForZSet().add(initTxRedisKey(ServiceNameSpace.GROUP_FINISH_ZSET), localTxKey ,System.currentTimeMillis());
+				public void addToGroupFinishSet(String localTxKey) throws Exception {
+					redis.opsForZSet().add(appendNameSpace(NameSpace.GROUP_FINISH_ZSET), localTxKey ,System.currentTimeMillis());
 				}
 				@Override
-				public long sizeGroupFinishSet() {
-					return redis.opsForZSet().size(initTxRedisKey(ServiceNameSpace.GROUP_FINISH_ZSET));
+				public long sizeGroupFinishSet() throws Exception {
+					return redis.opsForZSet().size(appendNameSpace(NameSpace.GROUP_FINISH_ZSET));
 				}
 				@Override
-				public boolean isGroupFinishZSetFull() {
+				public boolean isGroupFinishZSetFull() throws Exception {
 					return sizeGroupFinishSet() == opsForGroupServiceSetOperation().sizeGroupSeviceSet();
 				}
 			};
@@ -150,12 +154,12 @@ public class RedisRegister extends AbstractRegister{
 
 				@Override
 				public void addToGroupServiceSet(String ele) {
-					redis.opsForSet().add(initTxRedisKey(ServiceNameSpace.GROUP_SERVICE_SET), ele);
+					redis.opsForSet().add(appendNameSpace(NameSpace.GROUP_SERVICE_SET), ele);
 				}
 				
 				@Override
 				public long sizeGroupSeviceSet() {
-					return redis.opsForSet().size(initTxRedisKey(ServiceNameSpace.GROUP_SERVICE_SET));
+					return redis.opsForSet().size(appendNameSpace(NameSpace.GROUP_SERVICE_SET));
 				}
 
 			};
@@ -163,26 +167,5 @@ public class RedisRegister extends AbstractRegister{
 		return groupServiceSetOperation;
 	}
 	
-	@Override
-	public MainThreadMarkOperation opsForMainThreadMarkOperation() {
-		if(null == mainThreadMarkOperation) {
-			mainThreadMarkOperation = new MainThreadMarkOperation() {
-				
-				@Override
-				public void setFinshed() {
-					redis.opsForValue().set(initTxRedisKey(ServiceNameSpace.MAIN_THREAD_MARK), NORMAL);
-				}
-				
-				@Override
-				public boolean isFinshed() {
-					if(StringUtils.isNotBlank(redis.opsForValue().get(initTxRedisKey(ServiceNameSpace.MAIN_THREAD_MARK)))) {
-						return true;
-					}
-					return false;
-				}
-			};
-		}
-		return mainThreadMarkOperation;
-	}
 	
 }

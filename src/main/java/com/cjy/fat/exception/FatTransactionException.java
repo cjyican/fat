@@ -1,5 +1,7 @@
 package com.cjy.fat.exception;
 
+import com.cjy.fat.data.TransactionContent;
+
 public class FatTransactionException extends RuntimeException{
 
 	private static final long serialVersionUID = 6753994776962949879L;
@@ -12,11 +14,7 @@ public class FatTransactionException extends RuntimeException{
 	
 	public FatTransactionException(String message) {
 	    super(message);
-	}
-
-	public FatTransactionException(String txKey  , String message ) {
-		super(message);
-		this.txKey = txKey;
+	    this.txKey = TransactionContent.getRootTxKey();
 	}
 
 	public String getTxKey() {
