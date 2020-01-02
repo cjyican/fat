@@ -61,7 +61,7 @@ public class RedisConfig {
 			return null;
 		}
 		
-		LOG.info("use redis as register");
+		LOG.info("use redis as register...");
 		
 		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<String, Object>(); 
 		redisTemplate.setConnectionFactory(this.connectionFactory());
