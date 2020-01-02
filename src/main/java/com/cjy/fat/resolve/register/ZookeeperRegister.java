@@ -6,6 +6,7 @@ import java.util.concurrent.CountDownLatch;
 import org.apache.zookeeper.WatchedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.config.ZooTemplate;
@@ -19,6 +20,7 @@ import com.cjy.fat.resolve.register.servicenode.ZookeeperNameSpaceAppender;
 
 @Component
 @ConditionalOnBean(name= {"zooTemplate"})
+@Primary
 public class ZookeeperRegister extends AbstractRegister{
 	
 	@Autowired

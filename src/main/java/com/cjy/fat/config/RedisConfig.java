@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
@@ -18,7 +17,6 @@ import com.cjy.fat.util.CollectionUtil;
 import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
-@ConditionalOnMissingBean(name= {"zooTemplate"})
 public class RedisConfig {
 	
 	public static Logger LOG  = LoggerFactory.getLogger(RedisConfig.class);
@@ -76,7 +74,7 @@ public class RedisConfig {
 		
 	}
 
-	public RedisConnectionFactory connectionFactory() {
+	private RedisConnectionFactory connectionFactory() {
 		JedisConnectionFactory jedis = null;
 		RedisClusterConfiguration clusterConfig = buildRedisClusterConfig();
 		if(null != clusterConfig) {
@@ -97,7 +95,7 @@ public class RedisConfig {
 		return factory;
 	}
 	
-	public RedisClusterConfiguration buildRedisClusterConfig() {
+	private RedisClusterConfiguration buildRedisClusterConfig() {
 		if(StringUtils.isNotBlank(StringUtils.trim(clusterNodes))) {
 			RedisClusterConfiguration clusterConfigeration = new RedisClusterConfiguration(CollectionUtil.covertStringToCollection(clusterNodes));
 			if(maxRedirects == 0){
@@ -109,7 +107,7 @@ public class RedisConfig {
 		return null;
 	}
 
-	public JedisPoolConfig poolCofig() {
+	private JedisPoolConfig poolCofig() {
 		JedisPoolConfig poolCofig = new JedisPoolConfig();
 		poolCofig.setMaxIdle(Integer.valueOf(maxIdle));
 		poolCofig.setMaxTotal(maxActive);
