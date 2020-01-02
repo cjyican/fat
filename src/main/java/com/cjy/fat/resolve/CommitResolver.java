@@ -1,6 +1,5 @@
 package com.cjy.fat.resolve;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -52,9 +51,9 @@ public class CommitResolver {
 	public boolean popGroupCanCommitList() throws Exception{
 		while(true) {
 			
-			String canCommit = register.opsForGroupCanCommitListOperation().watchGroupCanCommit(commitBlankTime);
+			boolean canCommit = register.opsForGroupCanCommitListOperation().watchGroupCanCommit(commitBlankTime);
 			
-			if(StringUtils.isBlank(canCommit)) {
+			if(!canCommit) {
 				
 				register.opsForServiceError().isServiceError();
 				

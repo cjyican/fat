@@ -16,7 +16,7 @@ public class ZookeeperConfig {
 	@Value("${fat.zookeeper.host:}")
 	private String host;
 	
-	@Value("${fat.zookeeper.sessionTimeout:60000}")
+	@Value("${fat.zookeeper.sessionTimeout:30000}")
 	private int sessionTimeout;
 	
 	@Bean

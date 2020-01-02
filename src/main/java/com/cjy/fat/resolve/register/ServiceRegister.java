@@ -4,7 +4,6 @@ import com.cjy.fat.resolve.register.operation.GroupCanCommitListOperation;
 import com.cjy.fat.resolve.register.operation.GroupFinishSetOperation;
 import com.cjy.fat.resolve.register.operation.GroupServiceSetOperation;
 import com.cjy.fat.resolve.register.operation.ServiceErrorOperation;
-import com.cjy.fat.resolve.register.servicenode.NameSpace;
 
 public interface ServiceRegister {
 	
@@ -12,17 +11,13 @@ public interface ServiceRegister {
 	
 	static final String ERROR = "1";
 	
-	static final String REDIS_MARK = ":";
-	
-	static final String ZOO_MARK = "/";
-	
 	/**
 	 * 生成一次分布式事务的key
 	 * @param serviceName 当前服务系统名称
 	 * @return
 	 * @throws Exception 
 	 */
-	String createTxKey(NameSpace nameSpace) throws Exception;
+	String createTxKey() throws Exception;
 	
 	/**
 	 * 获取事务失败操作类

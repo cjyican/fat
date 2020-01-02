@@ -7,13 +7,13 @@ import java.util.concurrent.TimeUnit;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.ZooKeeper.States;
 import org.apache.zookeeper.data.Stat;
 
 import com.cjy.fat.resolve.register.TxWatcher;
-import com.cjy.fat.resolve.register.servicenode.NameSpace;
-import com.cjy.fat.resolve.register.servicenode.ZookeeperNameSpaceAppender;
+import com.cjy.fat.resolve.register.ZookeeperRegister;
 
 public class ZooTemplate {
 	
@@ -53,11 +53,15 @@ public class ZooTemplate {
 	}
 	
 	public String creteNode(String path) throws Exception {
-		return zoo.create(path, null, null, CreateMode.PERSISTENT);
+		return zoo.create(path, null,  ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 	}
 	
-	public String createSeqNode(NameSpace nameSpace) throws Exception {
-		return zoo.create(nameSpace.getNameSpace(), null, null, CreateMode.PERSISTENT_SEQUENTIAL);
+	public String creteNode(String path , String data) throws Exception {
+		return zoo.create(path, data.getBytes(),  ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+	}
+	
+	public String createSeqNode(String path, String data) throws Exception {
+		return zoo.create(path, data.getBytes(defaultCharset), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT_SEQUENTIAL);
 	}
 
 	public String getData(String path) throws Exception {
@@ -69,27 +73,35 @@ public class ZooTemplate {
 	}
 	
 	public void setData(String path , String data) throws Exception {
-		zoo.setData(path, data.getBytes(), 0);
+		zoo.setData(path, data.getBytes(defaultCharset), 0);
 	}
 
-	public void createChildren(String parentPath, String childrenPath) throws Exception {
+	public void createChildren(String parentPath, String childrenPath , String data) throws Exception {
 		Stat stat = zoo.exists(parentPath, false);		
 		if(stat == null) {
 			zoo.create(parentPath, null, null, CreateMode.PERSISTENT);
 		}
-		zoo.create(parentPath + ZookeeperNameSpaceAppender.ZOOKEEPER_PRE , null, null,  CreateMode.PERSISTENT);
+		zoo.create(parentPath + ZookeeperRegister.ZOO_PRE  + childrenPath, data.getBytes(defaultCharset), ZooDefs.Ids.OPEN_ACL_UNSAFE,  CreateMode.PERSISTENT);
 	}
 
 	public List<String> getChildrens(String parenPath) throws Exception{
 		return zoo.getChildren(parenPath, false);
 	}
 
-	public String exists(String path, TxWatcher txWatcher) throws Exception {
+	public boolean exists(String path, TxWatcher txWatcher) throws Exception {
 		Stat stat = zoo.exists(path, txWatcher);
 		if(stat != null) {
-			return path;
+			return true;
 		}
-		return null;
+		return false;
+	}
+	
+	public boolean exists(String path) throws Exception {
+		Stat stat = zoo.exists(path, null);
+		if(stat != null) {
+			return true;
+		}
+		return false;
 	}
 	
 	

@@ -14,7 +14,7 @@ public interface GroupCanCommitListOperation {
 	 * @param waitMilliesSecond
 	 * @return
 	 */
-	public String watchGroupCanCommit( long waitMilliesSecond) throws Exception ;
+	public boolean watchGroupCanCommit( long waitMilliesSecond) throws Exception ;
 	
 	
 }

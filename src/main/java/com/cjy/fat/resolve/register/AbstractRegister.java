@@ -5,19 +5,24 @@ import com.cjy.fat.resolve.register.operation.GroupFinishSetOperation;
 import com.cjy.fat.resolve.register.operation.GroupServiceSetOperation;
 import com.cjy.fat.resolve.register.operation.ServiceErrorOperation;
 import com.cjy.fat.resolve.register.servicenode.NameSpace;
-import com.cjy.fat.resolve.register.servicenode.NameSpaceAppender;
 
-public abstract class AbstractRegister implements ServiceRegister , NameSpaceAppender{
-
-	private NameSpaceAppender nameSpaceAppender;
+public abstract class AbstractRegister implements ServiceRegister{
 	
 	AbstractRegister(){
 		
 	}
 	
-	AbstractRegister(NameSpaceAppender nameSpaceAppender ){
-		this.nameSpaceAppender = nameSpaceAppender;
+	public String rootNameSpace ;
+	
+	public String getRootNameSpace() {
+		return rootNameSpace;
 	}
+	
+	protected abstract void setRootNameSpace ();
+	
+	protected abstract void initRootNameSpace () throws Exception ;
+	
+	protected abstract String appendNameSpace(NameSpace nameSpace) ;
 	
 	protected GroupCanCommitListOperation groupCanCommitListOperation;
 	
@@ -27,9 +32,6 @@ public abstract class AbstractRegister implements ServiceRegister , NameSpaceApp
 	
 	protected GroupServiceSetOperation groupServiceSetOperation ; 
 	
-	@Override
-	public String appendNameSpace(NameSpace nameSpace) {
-		return nameSpaceAppender.appendNameSpace(nameSpace);
-	};
+	
 	
 }

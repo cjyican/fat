@@ -7,7 +7,6 @@ import org.springframework.stereotype.Component;
 import com.cjy.fat.annotation.FatServiceRegister;
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.resolve.register.ServiceRegister;
-import com.cjy.fat.resolve.register.servicenode.NameSpace;
 
 @Component
 public class ServiceRegisterResolver {
@@ -21,7 +20,7 @@ public class ServiceRegisterResolver {
 		}
 		
 		if (StringUtils.isEmpty(TransactionContent.getRootTxKey())) {
-			String rootTxKey = register.createTxKey(NameSpace.FAT_KEY_ID);
+			String rootTxKey = register.createTxKey();
 			TransactionContent.setRootTxKey(rootTxKey);
 			
 			// 初始化事务组回滚标识

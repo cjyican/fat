@@ -10,18 +10,20 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.resolve.register.operation.GroupCanCommitListOperation;
 import com.cjy.fat.resolve.register.operation.GroupFinishSetOperation;
 import com.cjy.fat.resolve.register.operation.GroupServiceSetOperation;
 import com.cjy.fat.resolve.register.operation.ServiceErrorOperation;
 import com.cjy.fat.resolve.register.servicenode.NameSpace;
-import com.cjy.fat.resolve.register.servicenode.RedisNameSpaceAppender;
 import com.cjy.fat.util.StringUtil;
 
 @Component
 @ConditionalOnBean(name = {"fatRedis"})
 public class RedisRegister extends AbstractRegister{
+	
+	public static final String REDIS_SUFF = ":";
 	
 	@Resource(name = "fatRedis")
 	RedisTemplate<String, String> redis;
@@ -29,14 +31,29 @@ public class RedisRegister extends AbstractRegister{
 	@Value("${spring.application.name}")
 	String serviceName;
 	
-	RedisRegister(){
-		super(new RedisNameSpaceAppender());
-	}
+	RedisRegister(){}
 	
 	@Override
-	public String createTxKey(NameSpace nameSpace){
-		Long txKeyId = redis.opsForValue().increment(nameSpace.getNameSpace(), 1);
+	public String createTxKey(){
+		Long txKeyId = redis.opsForValue().increment(getRootNameSpace() + NameSpace.FAT_KEY_ID, 1);
 		return  serviceName + StringUtil.initTxKey(txKeyId + "");
+	}
+	
+
+
+	@Override
+	protected void setRootNameSpace() {
+		this.rootNameSpace = NameSpace.FAT_PRE.getNameSpace() + REDIS_SUFF;
+	}
+
+	@Override
+	protected void initRootNameSpace() throws Exception {
+		
+	}
+
+	@Override
+	protected String appendNameSpace(NameSpace nameSpace) {
+		return getRootNameSpace() + TransactionContent.getRootTxKey() + REDIS_SUFF + nameSpace.getNameSpace();
 	}
 	
 	
@@ -118,8 +135,12 @@ public class RedisRegister extends AbstractRegister{
 					pushToBlockListFromSet(NameSpace.GROUP_SERVICE_SET, NameSpace.GROUP_CANCOMMIT_LIST);
 				}
 				@Override
-				public String watchGroupCanCommit( long waitMilliesSecond) {
-					return redis.opsForList().leftPop(appendNameSpace(NameSpace.GROUP_CANCOMMIT_LIST), waitMilliesSecond, TimeUnit.MILLISECONDS);
+				public boolean watchGroupCanCommit( long waitMilliesSecond) {
+					String ele = redis.opsForList().leftPop(appendNameSpace(NameSpace.GROUP_CANCOMMIT_LIST), waitMilliesSecond, TimeUnit.MILLISECONDS);
+					if(ele != null) {
+						return true;
+					}
+					return false;
 				}
 			};
 		}
@@ -166,6 +187,5 @@ public class RedisRegister extends AbstractRegister{
 		}
 		return groupServiceSetOperation;
 	}
-	
 	
 }
