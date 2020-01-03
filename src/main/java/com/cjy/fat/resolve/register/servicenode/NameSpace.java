@@ -15,7 +15,7 @@ public enum NameSpace {
 	/**
 	 * 是否有服务/事务出错 {@link RedisHelper }
 	 */
-	IS_SERVICE_ERROR("service_error"),
+	SERVICE_ERROR("service_error"),
 	
 	/**
 	 * 事务分组协调器完成的列表，set

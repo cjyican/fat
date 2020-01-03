@@ -73,7 +73,7 @@ public class ServiceRunningHandler {
 			
 		} catch (Exception e) {
 			
-			register.opsForServiceError().serviceError();
+			register.opsForServiceError().serviceError(param.getLocalTxMark());
 			
 			param.setLocalRunningException(e);
 			

@@ -14,6 +14,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.annotation.FatServiceRegister;
+import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.resolve.register.ServiceRegister;
 
 @Aspect
@@ -51,7 +52,7 @@ public class ServiceRegisterAspect {
 
 	@AfterThrowing(value="txServiceRegister(txRegisterService)" , throwing = "ex")
 	public void handleThrowing(JoinPoint joinPoint, FatServiceRegister txRegisterService , Exception ex ) throws Exception{
-		register.opsForServiceError().serviceError();
+		register.opsForServiceError().serviceError(TransactionContent.getServiceId());
 		Logger.error(ex.getMessage());
 	}
 

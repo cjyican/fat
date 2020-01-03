@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -106,21 +107,20 @@ public class RedisRegister extends AbstractRegister{
 	public ServiceErrorOperation opsForServiceError() {
 		if(null == serviceErrorOperation) {
 			serviceErrorOperation = new ServiceErrorOperation() {
+				
 				@Override
-				public void serviceNomal() {
-					redis.opsForValue().set(appendNameSpace(NameSpace.IS_SERVICE_ERROR) , NORMAL);
+				public void serviceError(String serviceName) {
+					redis.opsForValue().set(appendNameSpace(NameSpace.SERVICE_ERROR) , ERROR);
 				}
-				@Override
-				public void serviceError() {
-					redis.opsForValue().set(appendNameSpace(NameSpace.IS_SERVICE_ERROR) , ERROR);
-				}
+				
 				@Override
 				public void isServiceError() {
-					boolean isError = redis.opsForValue().get(appendNameSpace(NameSpace.IS_SERVICE_ERROR)).equals(ERROR);
-					if(isError){
-						throw new FatTransactionException(" other service occured error when runnning local transaction");
+					String errorServiceName = redis.opsForValue().get(appendNameSpace(NameSpace.SERVICE_ERROR));
+					if(StringUtils.isNotBlank(errorServiceName)){
+						FatTransactionException.throwRemoteNodeErrorException(errorServiceName);
 					}
 				}
+				
 			};
 		}
 		return serviceErrorOperation;

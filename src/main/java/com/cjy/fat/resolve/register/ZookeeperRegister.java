@@ -5,6 +5,7 @@ import java.util.concurrent.CountDownLatch;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.WatchedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -65,22 +66,18 @@ public class ZookeeperRegister extends AbstractRegister{
 			serviceErrorOperation = new ServiceErrorOperation() {
 				
 				@Override
-				public void serviceNomal() throws Exception {
-					zooTemplate.creteNode(appendNameSpace(NameSpace.FAT_PRE), NORMAL);
-				}
-				
-				@Override
-				public void serviceError() throws Exception {
-					zooTemplate.setData(appendNameSpace(NameSpace.FAT_PRE), ERROR);
+				public void serviceError(String serviceName) throws Exception {
+					zooTemplate.setData(appendNameSpace(NameSpace.SERVICE_ERROR), serviceName);
 				}
 				
 				@Override
 				public void isServiceError() throws Exception {
-					String serviceError = zooTemplate.getData(appendNameSpace(NameSpace.IS_SERVICE_ERROR));
-					if(serviceError.equals(ERROR)) {
-						throw new FatTransactionException(" other service occured error when runnning local transaction");
+					String errorServiceName = zooTemplate.getData(appendNameSpace(NameSpace.SERVICE_ERROR));
+					if(StringUtils.isNotBlank(errorServiceName)) {
+						FatTransactionException.throwRemoteNodeErrorException(errorServiceName);
 					}
 				}
+				
 			};
 		}
 		return serviceErrorOperation;
@@ -113,7 +110,7 @@ public class ZookeeperRegister extends AbstractRegister{
 						return true;
 					}
 					
-					latch.wait();
+					latch.await();
 					
 					return false;
 				}

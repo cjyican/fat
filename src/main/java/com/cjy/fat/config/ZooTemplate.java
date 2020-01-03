@@ -5,17 +5,22 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException.NodeExistsException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.ZooKeeper.States;
 import org.apache.zookeeper.data.Stat;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cjy.fat.resolve.register.TxWatcher;
 import com.cjy.fat.resolve.register.ZookeeperRegister;
 
 public class ZooTemplate {
+	
+	private static Logger LOG = LoggerFactory.getLogger(ZooTemplate.class);
 	
 	private static final String defaultCharset = "UTF-8";
 	
@@ -73,13 +78,17 @@ public class ZooTemplate {
 	}
 	
 	public void setData(String path , String data) throws Exception {
-		zoo.setData(path, data.getBytes(defaultCharset), 0);
+		zoo.setData(path, data.getBytes(defaultCharset),zoo.exists(path, false).getVersion());
 	}
 
 	public void createChildren(String parentPath, String childrenPath , String data) throws Exception {
-		Stat stat = zoo.exists(parentPath, false);		
+		Stat stat = zoo.exists(parentPath, false);
 		if(stat == null) {
-			zoo.create(parentPath, null, null, CreateMode.PERSISTENT);
+			try {
+				zoo.create(parentPath, parentPath.getBytes(defaultCharset), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+			} catch (NodeExistsException e) { // 这里可能会出现并发问题，上面exist都返回了false，这里会同时尝试创建父节点，这里直接catch，不使用同步处理，因为目的只是创建父节点，使其存在，并不时对已经存在的父节点进行更新或者其他处理
+				LOG.info("Node:" + parentPath + " exist");
+			}
 		}
 		zoo.create(parentPath + ZookeeperRegister.ZOO_PRE  + childrenPath, data.getBytes(defaultCharset), ZooDefs.Ids.OPEN_ACL_UNSAFE,  CreateMode.PERSISTENT);
 	}

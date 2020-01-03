@@ -24,7 +24,7 @@ public class ServiceRegisterResolver {
 			TransactionContent.setRootTxKey(rootTxKey);
 			
 			// 初始化事务组回滚标识
-			register.opsForServiceError().serviceNomal();
+//			register.opsForServiceError().serviceNomal();
 			
 		}
 		
