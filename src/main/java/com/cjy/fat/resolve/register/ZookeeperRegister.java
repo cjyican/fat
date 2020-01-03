@@ -19,6 +19,7 @@ import com.cjy.fat.resolve.register.operation.GroupCanCommitListOperation;
 import com.cjy.fat.resolve.register.operation.GroupFinishSetOperation;
 import com.cjy.fat.resolve.register.operation.GroupServiceSetOperation;
 import com.cjy.fat.resolve.register.operation.ServiceErrorOperation;
+import com.cjy.fat.resolve.register.operation.TxWatcher;
 import com.cjy.fat.resolve.register.servicenode.NameSpace;
 
 @Component
@@ -40,7 +41,7 @@ public class ZookeeperRegister extends AbstractRegister{
 		String rootNameSpace = getRootNameSpace();
 		boolean exist = zooTemplate.exists(rootNameSpace);
 		if(!exist) {
-			zooTemplate.creteNode(rootNameSpace, "fatRootNode");
+			zooTemplate.createNode(rootNameSpace, System.currentTimeMillis() + "");
 		}
 		
 	}
@@ -57,7 +58,7 @@ public class ZookeeperRegister extends AbstractRegister{
 	
 	@Override
 	public String createTxKey() throws Exception{
-		return zooTemplate.createSeqNode(getRootNameSpace() + ZOO_PRE + NameSpace.FAT_KEY_ID.getNameSpace() , "txKeySeq");
+		return zooTemplate.createSeqNode(getRootNameSpace() + ZOO_PRE + NameSpace.FAT_KEY_ID.getNameSpace() , System.currentTimeMillis() + "");
 	}
 
 	@Override
@@ -67,7 +68,7 @@ public class ZookeeperRegister extends AbstractRegister{
 				
 				@Override
 				public void serviceError(String serviceName) throws Exception {
-					zooTemplate.setData(appendNameSpace(NameSpace.SERVICE_ERROR), serviceName);
+					zooTemplate.createNode(appendNameSpace(NameSpace.SERVICE_ERROR) , serviceName);
 				}
 				
 				@Override
@@ -90,7 +91,7 @@ public class ZookeeperRegister extends AbstractRegister{
 
 				@Override
 				public void groupCanCommit() throws Exception {
-					zooTemplate.creteNode(appendNameSpace(NameSpace.GROUP_CANCOMMIT_LIST));
+					zooTemplate.createNode(appendNameSpace(NameSpace.GROUP_CANCOMMIT_LIST) , System.currentTimeMillis() + "");
 				}
 
 				@Override
@@ -141,7 +142,7 @@ public class ZookeeperRegister extends AbstractRegister{
 				
 				@Override
 				public void addToGroupFinishSet(String ele) throws Exception{
-					zooTemplate.createChildren(appendNameSpace(NameSpace.GROUP_FINISH_ZSET), ele , ele);
+					zooTemplate.createChildren(appendNameSpace(NameSpace.GROUP_FINISH_ZSET), ele , System.currentTimeMillis() +"");
 					
 				}
 			};
@@ -165,7 +166,7 @@ public class ZookeeperRegister extends AbstractRegister{
 				
 				@Override
 				public void addToGroupServiceSet(String ele) throws Exception {
-					zooTemplate.createChildren(appendNameSpace(NameSpace.GROUP_SERVICE_SET), ele,ele);
+					zooTemplate.createChildren(appendNameSpace(NameSpace.GROUP_SERVICE_SET), ele,System.currentTimeMillis()+ "");
 				}
 			};
 		}

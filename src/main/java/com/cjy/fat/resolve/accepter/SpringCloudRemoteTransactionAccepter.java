@@ -1,4 +1,4 @@
-package com.cjy.fat.resolve.accept;
+package com.cjy.fat.resolve.accepter;
 
 import javax.servlet.http.HttpServletRequest;
 

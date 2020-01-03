@@ -1,4 +1,4 @@
-package com.cjy.fat.resolve;
+package com.cjy.fat.resolve.handler;
 
 import java.util.List;
 
@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.data.TransactionContent;
-import com.cjy.fat.resolve.accept.RemoteTransactionAccepter;
+import com.cjy.fat.resolve.accepter.RemoteTransactionAccepter;
 
 @Component
-public class RemoteTransactionDataResolver {
+public class RemoteTransactionDataHandler {
 	
 	@Autowired
 	List<RemoteTransactionAccepter> accepters;

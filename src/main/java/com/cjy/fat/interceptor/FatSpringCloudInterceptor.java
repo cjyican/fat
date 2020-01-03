@@ -5,14 +5,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 
 import com.cjy.fat.data.TransactionContent;
-import com.cjy.fat.resolve.ServiceRegisterAspect;
+import com.cjy.fat.resolve.RegisterAspect;
 
 import feign.Feign;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
 @Component
-@ConditionalOnClass({ServiceRegisterAspect.class, Feign.class }) // 当使用TxAspect增强客户端的分布式事务时加载
+@ConditionalOnClass({RegisterAspect.class, Feign.class }) // 当使用TxAspect增强客户端的分布式事务时加载
 public class FatSpringCloudInterceptor implements RequestInterceptor {
 
 	/**

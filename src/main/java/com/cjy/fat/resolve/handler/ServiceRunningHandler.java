@@ -36,8 +36,8 @@ public class ServiceRunningHandler {
 	CommitResolver commitResolver;
 	
 	@Async("transactionResolveExecutor")
-	public void proceed(ProceedingJoinPoint joinPoint,Transactional transactional ,TransactionResolveParam param ,String rootTxKey) throws Throwable {
-		this.bulidCunrrentThreadTxAttributesContent(rootTxKey);
+	public void proceed(ProceedingJoinPoint joinPoint,Transactional transactional ,TransactionResolveParam txParam) throws Throwable {
+		TransactionContent.buildContainer(txParam);
 		
 		AbstractPlatformTransactionManager transactionManager = null ;
 		String transactionManagerName = transactional.transactionManager();
@@ -54,28 +54,28 @@ public class ServiceRunningHandler {
 		TransactionStatus transStatus = transactionManager.getTransaction(transDefinition);
 		
 		try {
-			Logger.info(param.getLocalTxMark() + " transaction start" );
+			Logger.info(txParam.getLocalTxMark() + " transaction start" );
 			
 			register.opsForServiceError().isServiceError();
 			
 			Object result = joinPoint.proceed();
 			
-			param.setLocalRunningResult(result);
+			txParam.setLocalRunningResult(result);
 			
-			Logger.info(param.getLocalTxMark() + " is finished , transaction is waiting for commit");
+			Logger.info(txParam.getLocalTxMark() + " is finished , transaction is waiting for commit");
 			
 			// 交给事务提交处理器处理可提交逻辑
-			commitResolver.blockProceed(param);
+			commitResolver.blockProceed(txParam);
 			
 			transactionManager.commit(transStatus);
 			
-			Logger.info( param.getLocalTxMark() +  " transaction commit");
+			Logger.info(txParam.getLocalTxMark() +  " transaction commit");
 			
 		} catch (Exception e) {
 			
-			register.opsForServiceError().serviceError(param.getLocalTxMark());
+			register.opsForServiceError().serviceError(txParam.getLocalTxMark());
 			
-			param.setLocalRunningException(e);
+			txParam.setLocalRunningException(e);
 			
 			transactionManager.rollback(transStatus);
 			
@@ -83,15 +83,12 @@ public class ServiceRunningHandler {
 		}
 	}
 	
-	/**
-	 * 由于在服务调服务的场景中，可能出现在service方法调用远程服务，处于不同线程中，所以此时需要再一次初始化当前线程的container
-	 * @param txData
-	 */
-	private void bulidCunrrentThreadTxAttributesContent(String rootTxKey) {
-		if(StringUtils.isNotBlank(rootTxKey)) {
-			TransactionContent.initContainer();
-			TransactionContent.setRootTxKey(rootTxKey);
-		}
-	}
+//	/**
+//	 * 由于在服务调服务的场景中，可能出现在service方法调用远程服务，处于不同线程中，所以此时需要再一次初始化当前线程的container
+//	 * @param txData
+//	 */
+//	private void bulidCunrrentThreadTxAttributesContent(TransactionResolveParam txParam) {
+//		TransactionContent.buildContainer(txParam);
+//	}
 
 }

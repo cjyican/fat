@@ -12,6 +12,7 @@ public class TransactionResolveParam {
 	 * 本地事务标识
 	 */
 	private String localTxMark;
+	
 	/**
 	 * 当前txKey所属的事务分组协调器 ， 当txKey与rootTxKey相等的时候，表示不要
 	 */

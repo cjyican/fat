@@ -1,4 +1,4 @@
-package com.cjy.fat.resolve.register;
+package com.cjy.fat.resolve.register.operation;
 
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -8,7 +8,7 @@ import com.cjy.fat.data.TransactionThreadLocal;
 
 public abstract class TxWatcher implements Watcher{
 	
-	private TransactionThreadLocal local = null;
+	private TransactionThreadLocal local;
 	
 	public TxWatcher(){
 		local = TransactionContent.getLocalData();

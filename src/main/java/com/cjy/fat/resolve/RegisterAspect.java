@@ -15,14 +15,15 @@ import org.springframework.stereotype.Component;
 
 import com.cjy.fat.annotation.FatServiceRegister;
 import com.cjy.fat.data.TransactionContent;
+import com.cjy.fat.resolve.handler.RemoteTransactionDataHandler;
 import com.cjy.fat.resolve.register.ServiceRegister;
 
 @Aspect
 @Component
 @Order(24)
-public class ServiceRegisterAspect {
+public class RegisterAspect {
 	
-	private static final Logger Logger = LoggerFactory.getLogger(ServiceRegisterAspect.class);
+	private static final Logger Logger = LoggerFactory.getLogger(RegisterAspect.class);
 	
 	@Autowired
 	ServiceRegister register;
@@ -34,10 +35,10 @@ public class ServiceRegisterAspect {
 	CommitResolver commitResolver;
 	
 	@Autowired
-	ServiceRegisterResolver serviceRegister;
+	RegisterResolver serviceRegister;
 	
 	@Autowired
-	RemoteTransactionDataResolver remoteTransactionDataResolver;
+	RemoteTransactionDataHandler remoteTransactionDataResolver;
 
 	@Pointcut("@annotation(txRegisterService)")
 	public void txServiceRegister(FatServiceRegister txRegisterService) {

@@ -9,7 +9,7 @@ import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.resolve.register.ServiceRegister;
 
 @Component
-public class ServiceRegisterResolver {
+public class RegisterResolver {
 
 	@Autowired
 	ServiceRegister register;
@@ -22,10 +22,6 @@ public class ServiceRegisterResolver {
 		if (StringUtils.isEmpty(TransactionContent.getRootTxKey())) {
 			String rootTxKey = register.createTxKey();
 			TransactionContent.setRootTxKey(rootTxKey);
-			
-			// 初始化事务组回滚标识
-//			register.opsForServiceError().serviceNomal();
-			
 		}
 		
 		// 将自己加入事务组

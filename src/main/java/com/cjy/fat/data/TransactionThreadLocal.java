@@ -12,6 +12,7 @@ public class TransactionThreadLocal {
 	 */
 	private String serviceId ;
 	
+	private TransactionResolveParam txParam;
 
 	public String getRootTxKey() {
 		return rootTxKey;
@@ -27,6 +28,14 @@ public class TransactionThreadLocal {
 
 	public void setServiceId(String serviceId) {
 		this.serviceId = serviceId;
+	}
+	
+	public TransactionResolveParam getTxParam() {
+		return txParam;
+	}
+	
+	public void setTxParam(TransactionResolveParam txParam) {
+		this.txParam = txParam;
 	}
 	
 }

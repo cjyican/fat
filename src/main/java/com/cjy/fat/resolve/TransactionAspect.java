@@ -52,18 +52,18 @@ public class TransactionAspect {
 			return proceedingJoinPoint.proceed();
 		}
 		
-		Method serviceMethod = signature.getMethod();
-		Transactional transactionalAnno = serviceMethod.getAnnotation(Transactional.class);
+		Method transactionMethod = signature.getMethod();
+		Transactional transactionalAnno = transactionMethod.getAnnotation(Transactional.class);
 		if(null == transactionalAnno) {
-			throw new FatTransactionException("the method " + serviceMethod.getName() + " is not decorated by @Transactional");
+			throw new FatTransactionException("the method " + transactionMethod.getName() + " is not decorated by @Transactional");
 		}
 		
-		String localTxMark = TransactionContent.getServiceId() + "-" + serviceMethod.getName();
+		String localTxMark = TransactionContent.getServiceId() + "-" + transactionMethod.getName();
 		TransactionResolveParam txParam = TransactionResolveParam.buildTxParam(localTxMark);
 		register.opsForGroupServiceSetOperation().addToGroupServiceSet(localTxMark);
 		
 		// 异步执行业务操作
-		serviceHandler.proceed(proceedingJoinPoint , transactionalAnno, txParam ,TransactionContent.getRootTxKey());
+		serviceHandler.proceed(proceedingJoinPoint , transactionalAnno, txParam);
 		return commitResolver.waitServiceResult(txParam);
 	}
 	

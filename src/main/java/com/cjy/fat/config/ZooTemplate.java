@@ -15,8 +15,8 @@ import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cjy.fat.resolve.register.TxWatcher;
 import com.cjy.fat.resolve.register.ZookeeperRegister;
+import com.cjy.fat.resolve.register.operation.TxWatcher;
 
 public class ZooTemplate {
 	
@@ -57,12 +57,12 @@ public class ZooTemplate {
 		ZooTemplate.zoo = zoo;
 	}
 	
-	public String creteNode(String path) throws Exception {
+	public String createNode(String path) throws Exception {
 		return zoo.create(path, null,  ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 	}
 	
-	public String creteNode(String path , String data) throws Exception {
-		return zoo.create(path, data.getBytes(),  ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+	public String createNode(String path , String data) throws Exception {
+		return zoo.create(path, data.getBytes(defaultCharset),  ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
 	}
 	
 	public String createSeqNode(String path, String data) throws Exception {
@@ -71,6 +71,14 @@ public class ZooTemplate {
 
 	public String getData(String path) throws Exception {
 		byte[] data = zoo.getData(path, null, null);
+		if(null == data) {
+			return null;
+		}
+		return new String(data, defaultCharset);
+	}
+	
+	public String getData(String path , TxWatcher watcher) throws Exception {
+		byte[] data = zoo.getData(path, watcher, null);
 		if(null == data) {
 			return null;
 		}

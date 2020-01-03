@@ -62,6 +62,17 @@ public class TransactionContent {
 	
 	/**
 	 * 由于使用了线程池，当线程复用的时候，TheadLocal依然存在，需要在请求入口清空ThreadLocal
+	 */
+	public static final void buildContainer(TransactionResolveParam txParam){
+		container.remove();
+		TransactionThreadLocal localData = new TransactionThreadLocal();
+		localData.setRootTxKey(txParam.getRootTxKey());
+		localData.setTxParam(txParam);
+		container.set(localData);
+	}
+	
+	/**
+	 * 由于使用了线程池，当线程复用的时候，TheadLocal依然存在，需要在请求入口清空ThreadLocal
 	 * @return 
 	 */
 	public static final TransactionThreadLocal getLocalData(){
