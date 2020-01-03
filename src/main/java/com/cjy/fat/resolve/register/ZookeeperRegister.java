@@ -1,11 +1,10 @@
 package com.cjy.fat.resolve.register;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.WatchedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -19,7 +18,7 @@ import com.cjy.fat.resolve.register.operation.GroupCanCommitListOperation;
 import com.cjy.fat.resolve.register.operation.GroupFinishSetOperation;
 import com.cjy.fat.resolve.register.operation.GroupServiceSetOperation;
 import com.cjy.fat.resolve.register.operation.ServiceErrorOperation;
-import com.cjy.fat.resolve.register.operation.TxWatcher;
+import com.cjy.fat.resolve.register.operation.zookeeper.TxWatcher;
 import com.cjy.fat.resolve.register.servicenode.NameSpace;
 
 @Component
@@ -39,6 +38,7 @@ public class ZookeeperRegister extends AbstractRegister{
 	protected void initRootNameSpace()  throws Exception{
 		setRootNameSpace();
 		String rootNameSpace = getRootNameSpace();
+		
 		boolean exist = zooTemplate.exists(rootNameSpace);
 		if(!exist) {
 			zooTemplate.createNode(rootNameSpace, System.currentTimeMillis() + "");
@@ -68,13 +68,20 @@ public class ZookeeperRegister extends AbstractRegister{
 				
 				@Override
 				public void serviceError(String serviceName) throws Exception {
-					zooTemplate.createNode(appendNameSpace(NameSpace.SERVICE_ERROR) , serviceName);
+					try {
+						zooTemplate.createNode(appendNameSpace(NameSpace.SERVICE_ERROR) , serviceName);
+					} catch (Exception e) {
+						// TODO
+					}
+					
 				}
 				
 				@Override
 				public void isServiceError() throws Exception {
-					String errorServiceName = zooTemplate.getData(appendNameSpace(NameSpace.SERVICE_ERROR));
-					if(StringUtils.isNotBlank(errorServiceName)) {
+					String errorNodePath = appendNameSpace(NameSpace.SERVICE_ERROR);
+					boolean isError = zooTemplate.exists(errorNodePath);
+					if(isError) {
+						String errorServiceName = zooTemplate.getData(errorNodePath);
 						FatTransactionException.throwRemoteNodeErrorException(errorServiceName);
 					}
 				}
@@ -96,24 +103,38 @@ public class ZookeeperRegister extends AbstractRegister{
 
 				@Override
 				public boolean watchGroupCanCommit(long waitMilliesSecond) throws Exception {
-					CountDownLatch latch = new CountDownLatch(1);
-					
-					boolean exist = zooTemplate.exists(appendNameSpace(NameSpace.GROUP_CANCOMMIT_LIST) , new TxWatcher() {
+					Semaphore sem = new Semaphore(1, true);
+					sem.acquire();
+					//监听可提交节点
+					zooTemplate.exists(appendNameSpace(NameSpace.GROUP_CANCOMMIT_LIST) , new TxWatcher() {
 
 						@Override
 						protected void watch(WatchedEvent event) {
-							latch.countDown();
+							sem.release();
 						}
 						
 					});
 					
-					if(exist) {
-						return true;
+					//监听出错节点
+					zooTemplate.exists(appendNameSpace(NameSpace.SERVICE_ERROR), new TxWatcher() {
+						
+						@Override
+						protected void watch(WatchedEvent event) throws Exception {
+							
+							String errorServiceName = zooTemplate.getData(appendNameSpace(NameSpace.SERVICE_ERROR));
+							TransactionContent.getTxParam().setLocalRunningException(FatTransactionException.buildRemoteNodeErrorException(errorServiceName));
+							
+							sem.release();
+						}
+					});
+					
+					sem.acquire();
+					
+					if(TransactionContent.getTxParam().getLocalRunningException() != null) {
+						throw TransactionContent.getTxParam().getLocalRunningException();
 					}
 					
-					latch.await();
-					
-					return false;
+					return true;
 				}
 				
 			};

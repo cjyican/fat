@@ -79,4 +79,8 @@ public class TransactionContent {
 		return container.get();
 	}
 	
+	public static final TransactionResolveParam getTxParam() {
+		return container.get().getTxParam();
+	}
+	
 }

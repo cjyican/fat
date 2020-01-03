@@ -79,6 +79,8 @@ public class ServiceRunningHandler {
 			
 			transactionManager.rollback(transStatus);
 			
+			Logger.info(txParam.getLocalTxMark() +  " rollbarck");
+			
 			e.printStackTrace();
 		}
 	}

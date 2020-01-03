@@ -1,4 +1,4 @@
-package com.cjy.fat.resolve.register.operation;
+package com.cjy.fat.resolve.register.operation.zookeeper;
 
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
@@ -17,9 +17,13 @@ public abstract class TxWatcher implements Watcher{
 	@Override
 	public void process(WatchedEvent event) {
 		TransactionContent.setContainer(local);
-		this.watch(event);
+		try {
+			this.watch(event);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
-	protected abstract void watch(WatchedEvent event);
+	protected abstract void watch(WatchedEvent event) throws Exception;
 
 }

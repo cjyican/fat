@@ -25,8 +25,12 @@ public class FatTransactionException extends RuntimeException{
 		this.txKey = txKey;
 	}
 	
+	public static FatTransactionException buildRemoteNodeErrorException(String errorServiceName) {
+		return new FatTransactionException("remote node named " + errorServiceName + " error when local transaction runnning ");
+	}
+	
 	public static void throwRemoteNodeErrorException(String errorServiceName) {
-		throw new FatTransactionException("remote node named " + errorServiceName + " error when local transaction runnning ");
+		throw buildRemoteNodeErrorException(errorServiceName);
 	}
 	
 }

@@ -3,6 +3,7 @@ package com.cjy.fat.resolve.register;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
@@ -32,24 +33,23 @@ public class RedisRegister extends AbstractRegister{
 	@Value("${spring.application.name}")
 	String serviceName;
 	
-	RedisRegister(){}
+	RedisRegister(){};
+
+	@PostConstruct
+	@Override
+	protected void initRootNameSpace() throws Exception {
+		this.setRootNameSpace();
+	}
 	
 	@Override
 	public String createTxKey(){
 		Long txKeyId = redis.opsForValue().increment(getRootNameSpace() + NameSpace.FAT_KEY_ID, 1);
 		return  serviceName + StringUtil.initTxKey(txKeyId + "");
 	}
-	
-
 
 	@Override
 	protected void setRootNameSpace() {
 		this.rootNameSpace = NameSpace.FAT_PRE.getNameSpace() + REDIS_SUFF;
-	}
-
-	@Override
-	protected void initRootNameSpace() throws Exception {
-		
 	}
 
 	@Override

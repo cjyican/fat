@@ -1,7 +1,7 @@
 package com.cjy.fat.config;
 
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.zookeeper.CreateMode;
@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cjy.fat.resolve.register.ZookeeperRegister;
-import com.cjy.fat.resolve.register.operation.TxWatcher;
+import com.cjy.fat.resolve.register.operation.zookeeper.TxWatcher;
 
 public class ZooTemplate {
 	
@@ -31,20 +31,20 @@ public class ZooTemplate {
 	}
 	
 	public ZooTemplate (String host , int sessionTimeout) throws Exception{
-		CountDownLatch connectLatch = new CountDownLatch(1);
-		
+		Semaphore sem = new Semaphore(1,true);
+		sem.acquire();
 		ZooKeeper zoo = new ZooKeeper(host, sessionTimeout, new Watcher() {
 			
 			@Override
 			public void process(WatchedEvent event) {
 				
-				connectLatch.countDown();
+				sem.release();
 				
 			}
 			
 		});
 		
-		connectLatch.await(sessionTimeout, TimeUnit.MILLISECONDS);
+		sem.tryAcquire(sessionTimeout, TimeUnit.MILLISECONDS);
 		
 		States connectionStats = zoo.getState();
 		if(!connectionStats.isConnected()) {
