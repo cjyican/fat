@@ -59,8 +59,9 @@ public class TransactionAspect {
 		}
 		
 		String localTxMark = TransactionContent.getServiceId() + "-" + transactionMethod.getName();
-		TransactionResolveParam txParam = TransactionResolveParam.buildTxParam(localTxMark);
 		register.opsForGroupServiceSetOperation().addToGroupServiceSet(localTxMark);
+		
+		TransactionResolveParam txParam = TransactionResolveParam.buildTxParam(localTxMark);
 		
 		// 异步执行业务操作
 		serviceHandler.proceed(proceedingJoinPoint , transactionalAnno, txParam);

@@ -1,12 +1,9 @@
 package com.cjy.fat.exception;
 
-import com.cjy.fat.data.TransactionContent;
-
 public class FatTransactionException extends RuntimeException{
 
 	private static final long serialVersionUID = 6753994776962949879L;
 
-	private String txKey ; 
 	
 	public FatTransactionException() {
         super();
@@ -14,15 +11,6 @@ public class FatTransactionException extends RuntimeException{
 	
 	public FatTransactionException(String message) {
 	    super(message);
-	    this.txKey = TransactionContent.getRootTxKey();
-	}
-
-	public String getTxKey() {
-		return txKey;
-	}
-
-	public void setTxKey(String txKey) {
-		this.txKey = txKey;
 	}
 	
 	public static FatTransactionException buildRemoteNodeErrorException(String errorServiceName) {
@@ -31,6 +19,10 @@ public class FatTransactionException extends RuntimeException{
 	
 	public static void throwRemoteNodeErrorException(String errorServiceName) {
 		throw buildRemoteNodeErrorException(errorServiceName);
+	}
+	
+	public static boolean isFatException(Exception e) {
+		return e instanceof FatTransactionException;
 	}
 	
 }

@@ -11,26 +11,26 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class TransactionThreadPoolConfig {
 	
-	@Value("${fat.thread.core_pool_size:20}")
+	@Value("${fat.thread.core_pool_size:50}")
 	private int corePoolSize ;
 	
-	@Value("${fat.thread.max_pool_size:50}")
+	@Value("${fat.thread.max_pool_size:100}")
 	private int maxPoolSize ;
 	
-	@Value("${fat.thread.queue_capacity:1000}")
+	@Value("${fat.thread.queue_capacity:10000}")
 	private int queueCapacity ;
 	
 	@Value("${fat.thread.keep_alive_seconds:60}")
 	private int keepAliveSeconds;
 
 	@Bean
-	public AsyncTaskExecutor transactionResolveExecutor() {
+	public AsyncTaskExecutor fatTxExecutor() {
 		 ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
          executor.setCorePoolSize(corePoolSize);//初始化线程数
          executor.setMaxPoolSize(maxPoolSize);//最大线程数量
          executor.setQueueCapacity(queueCapacity);//缓冲数量
          executor.setKeepAliveSeconds(keepAliveSeconds);//60秒内该线程未被执行自动销毁
-         executor.setThreadNamePrefix("fat_transaction-");
+         executor.setThreadNamePrefix("fatTx-");
          executor.setRejectedExecutionHandler(new ThreadPoolExecutor.AbortPolicy());
          executor.initialize();
          return executor;

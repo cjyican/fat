@@ -68,12 +68,7 @@ public class ZookeeperRegister extends AbstractRegister{
 				
 				@Override
 				public void serviceError(String serviceName) throws Exception {
-					try {
-						zooTemplate.createNode(appendNameSpace(NameSpace.SERVICE_ERROR) , serviceName);
-					} catch (Exception e) {
-						// TODO
-					}
-					
+					zooTemplate.createNode(appendNameSpace(NameSpace.SERVICE_ERROR) , serviceName);
 				}
 				
 				@Override

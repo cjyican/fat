@@ -1,5 +1,6 @@
 package com.cjy.fat.resolve;
 
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -35,9 +36,6 @@ public class RegisterAspect {
 	CommitResolver commitResolver;
 	
 	@Autowired
-	RegisterResolver serviceRegister;
-	
-	@Autowired
 	RemoteTransactionDataHandler remoteTransactionDataResolver;
 
 	@Pointcut("@annotation(txRegisterService)")
@@ -47,8 +45,18 @@ public class RegisterAspect {
 
 	@Before("txServiceRegister(txRegisterService)")
 	public void doBefore(JoinPoint joinPoint, FatServiceRegister txRegisterService) throws Exception {
+		if(!txRegisterService.openTransaction()) {
+			return;
+		}
+		
 		remoteTransactionDataResolver.init();
-		serviceRegister.registerService(txRegisterService);
+		
+		if (StringUtils.isEmpty(TransactionContent.getRootTxKey())) {
+			String rootTxKey = register.createTxKey();
+			TransactionContent.setRootTxKey(rootTxKey);
+		}
+		
+		register.opsForGroupServiceSetOperation().addToGroupServiceSet(TransactionContent.getServiceId());
 	}
 
 	@AfterThrowing(value="txServiceRegister(txRegisterService)" , throwing = "ex")

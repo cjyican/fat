@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisClusterConfiguration;
@@ -17,6 +18,7 @@ import com.cjy.fat.util.CollectionUtil;
 import redis.clients.jedis.JedisPoolConfig;
 
 @Configuration
+@ConditionalOnMissingBean(ZookeeperConfig.class)
 public class RedisConfig {
 	
 	public static Logger LOG  = LoggerFactory.getLogger(RedisConfig.class);

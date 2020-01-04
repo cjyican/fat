@@ -17,6 +17,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import com.cjy.fat.data.TransactionContent;
 import com.cjy.fat.data.TransactionResolveParam;
+import com.cjy.fat.exception.FatTransactionException;
 import com.cjy.fat.resolve.CommitResolver;
 import com.cjy.fat.resolve.register.ServiceRegister;
 
@@ -35,7 +36,7 @@ public class ServiceRunningHandler {
 	@Autowired
 	CommitResolver commitResolver;
 	
-	@Async("transactionResolveExecutor")
+	@Async("fatTxExecutor")
 	public void proceed(ProceedingJoinPoint joinPoint,Transactional transactional ,TransactionResolveParam txParam) throws Throwable {
 		TransactionContent.buildContainer(txParam);
 		
@@ -62,9 +63,8 @@ public class ServiceRunningHandler {
 			
 			txParam.setLocalRunningResult(result);
 			
-			Logger.info(txParam.getLocalTxMark() + " is finished , transaction is waiting for commit");
+			Logger.info(txParam.getLocalTxMark() + " is finished ,transaction is waiting for commit");
 			
-			// 交给事务提交处理器处理可提交逻辑
 			commitResolver.blockProceed(txParam);
 			
 			transactionManager.commit(transStatus);
@@ -73,7 +73,9 @@ public class ServiceRunningHandler {
 			
 		} catch (Exception e) {
 			
-			register.opsForServiceError().serviceError(txParam.getLocalTxMark());
+			if(!FatTransactionException.isFatException(e)) {
+				register.opsForServiceError().serviceError(txParam.getLocalTxMark());
+			}
 			
 			txParam.setLocalRunningException(e);
 			
@@ -84,13 +86,5 @@ public class ServiceRunningHandler {
 			e.printStackTrace();
 		}
 	}
-	
-//	/**
-//	 * 由于在服务调服务的场景中，可能出现在service方法调用远程服务，处于不同线程中，所以此时需要再一次初始化当前线程的container
-//	 * @param txData
-//	 */
-//	private void bulidCunrrentThreadTxAttributesContent(TransactionResolveParam txParam) {
-//		TransactionContent.buildContainer(txParam);
-//	}
 
 }

@@ -1,6 +1,5 @@
 package com.cjy.fat.config;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@ConditionalOnProperty(name="fat.zookeeper.host")
 public class ZookeeperConfig {
 	
 	public static Logger LOG  = LoggerFactory.getLogger(ZookeeperConfig.class);
@@ -16,16 +16,11 @@ public class ZookeeperConfig {
 	@Value("${fat.zookeeper.host:}")
 	private String host;
 	
-	@Value("${fat.zookeeper.sessionTimeout:30000}")
+	@Value("${fat.zookeeper.sessionTimeout:10000}")
 	private int sessionTimeout;
 	
 	@Bean
-	@ConditionalOnProperty(name="fat.zookeeper.host")
 	public ZooTemplate zooTemplate() throws Exception{
-		
-		if(StringUtils.isBlank(host)) {
-			return null;
-		}
 		
 		LOG.info("use zookeeper as register...");
 		
