@@ -1,10 +1,10 @@
 # fat
-FAT ,基于springboot , 使用redis , spring async , spring transactionManager的强一致性分布式事务解决方案
+FAT ,基于springboot , 使用zookeeper,redis , spring async , spring transactionManager的强一致性分布式事务解决方案
 ## 框架介绍
 纯编码方式，强一致性。<br>
-使用redis作为注册中心 ,代理事务的执行，使用spring async异步处理事务线程。<br>
+使用redis/zookeeper作为注册中心 ,代理事务的执行，使用spring async异步处理事务线程。<br>
 基于注解使用，对业务代码可以说是零入侵，目前内置适配spring-cloud(Feign调用) ， dubbo。<br>
-同时具备一定的扩展性与兼容性，因为存在自定义的服务框架，或者以后会涌现出更多的流行服务框架，所以会提供一些组件适配自定义服务框架。
+同时具备一定的扩展性与兼容性，因为存在自定义的服务框架，或者以后会涌现出更多的流行分布式服务框架，所以会提供一些组件适配自定义服务框架。
 
 ## Maven依赖
 ```java
@@ -30,8 +30,8 @@ public class FatboyEurekaRibbonApplication {
 }
 ```
 ### step1:配置注册中心
-使用redis作为注册中心，所以需要引入配置redis。为隔离业务使用的redis和注册中心的redis，提供了一套属性配置。
-在业务redis与注册中心相同时，也需要配置。
+使用redis/zookeeper作为注册中心，优先使用zookeeper。为隔离业务使用的redis和注册中心的redis，提供了一套属性配置。
+在业务redis/zookeeper作为注册中心与注册中心相同时，也需要配置。
 请保证各个服务的注册中心配置一致，否则无法协调分布式事务。
 ```java
 #Fat
@@ -55,6 +55,12 @@ fat.redis.pool.min-idle=2
 fat.redis.timeout=1000 
 # 集群模式,如有配置，将优先使用集群
 fat.redis.cluster.nodes=x.x.x.x:x,x.x.x.x:x
+
+# zookeeper服务器地址
+fat.zookeeper.host=x.x.x.x:x,x.x.x.x:x
+
+# zookeeper活跃时间
+fat.zookeeper.sessionTimeout=x.x.x.x:x,x.x.x.x:x
 
 ```
 应用标识，与spirng.application.name一致，必须配置
